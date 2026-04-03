@@ -1,6 +1,0 @@
-fastapi>=0.110
-uvicorn[standard]>=0.29
-apscheduler>=3.10,<4
-opencv-python-headless>=4.9
-pyyaml>=6.0
-aiosqlite>=0.20
