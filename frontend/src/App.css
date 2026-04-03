@@ -1,0 +1,347 @@
+/* ==========================================================================
+   Holo Remote — Styles
+   ========================================================================== */
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --border: #1e1e2e;
+  --text: #c9c9d6;
+  --text-muted: #6b6b80;
+  --accent: #7c6ff7;
+  --accent-hover: #6a5de0;
+  --green: #4ade80;
+  --red: #f87171;
+  --radius: 10px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+}
+
+/* Loading screen */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  gap: 16px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Login screen
+   ========================================================================== */
+
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100dvh;
+  padding: 24px;
+}
+
+.login-card {
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+}
+
+.login-card h1 {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+
+/* PIN dots */
+.pin-dots {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  transition: all 0.15s;
+}
+
+.pin-dot.filled {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Error */
+.login-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+/* Numpad */
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.numpad-btn {
+  height: 56px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: #fff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.numpad-btn:active {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(0.95);
+}
+
+.numpad-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.numpad-delete {
+  color: var(--text-muted);
+  font-size: 1.5rem;
+}
+
+.numpad-submit {
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.numpad-submit:active {
+  background: var(--accent-hover);
+}
+
+/* ==========================================================================
+   Remote panel
+   ========================================================================== */
+
+.remote-panel {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100dvh;
+}
+
+/* Header */
+.remote-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.remote-header h1 {
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.remote-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.online { background: var(--green); }
+.status-dot.offline { background: var(--red); }
+
+.status-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.btn-logout {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+
+.btn-logout:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Actions */
+.remote-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.action-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(124, 111, 247, 0.08);
+}
+
+.action-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Clients list */
+.remote-clients {
+  margin-bottom: 32px;
+}
+
+.remote-clients h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.clients-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.client-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.client-card.client-hologram { border-left: 3px solid var(--green); }
+.client-card.client-remote { border-left: 3px solid var(--accent); }
+.client-card.client-unknown { border-left: 3px solid var(--text-muted); }
+
+.client-icon {
+  font-size: 1.2rem;
+  width: 24px;
+  text-align: center;
+}
+
+.client-hologram .client-icon { color: var(--green); }
+.client-remote .client-icon { color: var(--accent); }
+
+.client-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.client-id {
+  font-size: 0.9rem;
+  color: #fff;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+
+.client-role {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Message log */
+.remote-log h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.log-entries {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: "Cascadia Code", "Fira Code", monospace;
+  font-size: 0.8rem;
+}
+
+.log-empty {
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.log-entry {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  word-break: break-all;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+}
+
+.log-entry.sent { color: var(--accent); }
+.log-entry.received { color: var(--green); }

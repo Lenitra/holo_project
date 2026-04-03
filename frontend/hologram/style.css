@@ -1,0 +1,111 @@
+/* ==========================================================================
+   Hologramme — Rendu pyramide 4 faces
+
+   L'écran est divisé en croix. Chaque face affiche le même contenu
+   tourné pour correspondre à sa face de la pyramide.
+   Fond noir = transparent sur le verre.
+   ========================================================================== */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    cursor: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Grille en T inversé : 3×2, cellules carrées, centrée à l'écran */
+.pyramid {
+    /*
+       Chaque cellule est un carré de côté = min(largeur/3, hauteur/2)
+       pour remplir au maximum l'écran tout en gardant la forme.
+    */
+    --cell: min(calc(100vw / 3), calc(100vh / 2));
+    width: calc(var(--cell) * 3);
+    height: calc(var(--cell) * 2);
+    display: grid;
+    grid-template-columns: var(--cell) var(--cell) var(--cell);
+    grid-template-rows: var(--cell) var(--cell);
+    grid-template-areas:
+        "left  .      right"
+        ".     bottom .";
+}
+
+/* Placement des faces */
+.face.right  { grid-area: right; }
+.face.bottom { grid-area: bottom; }
+.face.left   { grid-area: left; }
+
+/* Chaque face : centrée, contient le contenu, bordure visible */
+.face {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Rotations pour chaque face de la pyramide */
+.face.right  .content { transform: rotate(270deg); }
+.face.bottom .content { transform: rotate(0deg); }
+.face.left   .content { transform: rotate(90deg); }
+
+/* Conteneur du contenu (vidéo + overlay) */
+.content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Vidéo avatar */
+.avatar {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Overlay texte par-dessus la vidéo */
+.overlay {
+    position: absolute;
+    bottom: 10%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #fff;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-size: 1.2vw;
+    text-shadow: 0 0 10px rgba(124, 111, 247, 0.8), 0 0 20px rgba(124, 111, 247, 0.4);
+    pointer-events: none;
+}
+
+.overlay .time {
+    font-size: 3vw;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+}
+
+.overlay .info {
+    font-size: 1.2vw;
+    opacity: 0.8;
+    margin-top: 0.5vw;
+}
+
+/* Transition entre clips */
+.avatar.fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.avatar.fade-in {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}

@@ -1,312 +1,778 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Assistant Custom</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Assistant Custom — Projet Holographique</title>
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --border: #1e1e2e;
+            --text: #c9c9d6;
+            --text-muted: #6b6b80;
+            --accent: #7c6ff7;
+            --accent-dim: #5a4fd4;
+            --accent-glow: rgba(124, 111, 247, 0.15);
+            --green: #4ade80;
+            --blue: #60a5fa;
+            --orange: #fb923c;
+            --radius: 10px;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
-      line-height: 1.6;
-      padding: 2rem;
-      max-width: 960px;
-      margin: 0 auto;
-    }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-      color: #58a6ff;
-    }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
 
-    h2 {
-      font-size: 1.4rem;
-      margin-top: 2.5rem;
-      margin-bottom: 1rem;
-      color: #58a6ff;
-      border-bottom: 1px solid #21262d;
-      padding-bottom: 0.4rem;
-    }
+        /* Subtle grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(124, 111, 247, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124, 111, 247, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    h3 {
-      font-size: 1.1rem;
-      margin-top: 1.5rem;
-      margin-bottom: 0.5rem;
-      color: #79c0ff;
-    }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
 
-    p { margin-bottom: 1rem; }
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+        }
 
-    strong { color: #f0f6fc; }
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--accent-glow);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
 
-    hr {
-      border: none;
-      border-top: 1px solid #21262d;
-      margin: 2rem 0;
-    }
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
 
-    pre {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 6px;
-      padding: 1rem;
-      overflow-x: auto;
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
-      color: #c9d1d9;
-    }
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
 
-    code {
-      background: #161b22;
-      padding: 0.15em 0.4em;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
 
-    pre code {
-      background: none;
-      padding: 0;
-    }
+        /* Sections */
+        section {
+            margin-bottom: 64px;
+        }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
 
-    th, td {
-      text-align: left;
-      padding: 0.6rem 1rem;
-      border: 1px solid #30363d;
-    }
+        .section-title .num {
+            color: var(--accent);
+            margin-right: 8px;
+            font-weight: 400;
+        }
 
-    th {
-      background: #161b22;
-      color: #79c0ff;
-      font-weight: 600;
-    }
+        /* Architecture diagram */
+        .arch-diagram {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            overflow-x: auto;
+        }
 
-    td { background: #0d1117; }
+        .arch-diagram pre {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            white-space: pre;
+            margin: 0;
+        }
 
-    ul, ol {
-      margin-bottom: 1rem;
-      padding-left: 1.5rem;
-    }
+        /* Process cards */
+        .process-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
 
-    li { margin-bottom: 0.3rem; }
+        @media (max-width: 700px) {
+            .process-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2rem; }
+        }
 
-    .subtitle {
-      color: #8b949e;
-      font-size: 1.1rem;
-      margin-bottom: 2rem;
-    }
+        .process-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
 
-    .diagram {
-      font-family: monospace;
-      white-space: pre;
-      line-height: 1.4;
-    }
+        .process-card:hover {
+            border-color: var(--accent-dim);
+        }
 
-    .highlight { color: #ffa657; }
-  </style>
+        .process-card .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .process-card:nth-child(1) .label { color: var(--accent); }
+        .process-card:nth-child(2) .label { color: var(--green); }
+        .process-card:nth-child(3) .label { color: var(--blue); }
+
+        .process-card h3 {
+            color: #fff;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .process-card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .principle {
+            background: var(--accent-glow);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .principle strong { color: #fff; }
+
+        /* Tech tables */
+        .tech-group {
+            margin-bottom: 24px;
+        }
+
+        .tech-group h3 {
+            font-size: 1rem;
+            color: #fff;
+            margin-bottom: 12px;
+            padding-left: 12px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .tech-group:nth-of-type(2) h3 { border-color: var(--green); }
+        .tech-group:nth-of-type(3) h3 { border-color: var(--blue); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        td code {
+            background: rgba(124, 111, 247, 0.1);
+            color: var(--accent);
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+        }
+
+        /* Communication */
+        .comm-table td:first-child {
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .msg-example {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            margin-top: 16px;
+        }
+
+        .msg-example h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .msg-example pre {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            color: var(--green);
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .msg-example .key { color: var(--blue); }
+        .msg-example .str { color: var(--green); }
+        .msg-example .punct { color: var(--text-muted); }
+
+        .msg-note {
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Modules */
+        .modules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .modules-grid { grid-template-columns: 1fr; }
+        }
+
+        .module-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .module-card h4 {
+            color: #fff;
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .module-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .module-card .tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-v1 {
+            background: rgba(74, 222, 128, 0.1);
+            color: var(--green);
+        }
+
+        .tag-future {
+            background: rgba(251, 146, 60, 0.1);
+            color: var(--orange);
+        }
+
+        /* Flow timeline */
+        .flow-list {
+            list-style: none;
+            position: relative;
+            padding-left: 32px;
+        }
+
+        .flow-list::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .flow-list li {
+            position: relative;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+
+        .flow-list li::before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: 8px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 2px solid var(--bg);
+        }
+
+        .flow-list li strong {
+            color: #fff;
+        }
+
+        .flow-list li code {
+            background: rgba(124, 111, 247, 0.1);
+            color: var(--accent);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+        }
+
+        /* Structure */
+        .tree {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+        }
+
+        .tree pre {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .tree pre .folder { color: var(--blue); }
+        .tree pre .file { color: var(--text); }
+        .tree pre .comment { color: #444460; }
+
+        /* Hologram pyramid diagram */
+        .pyramid-diagram {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-top: 16px;
+            overflow-x: auto;
+        }
+
+        .pyramid-diagram pre {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+            white-space: pre;
+            margin: 0;
+        }
+
+        /* Launch */
+        .launch-blocks {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 700px) {
+            .launch-blocks { grid-template-columns: 1fr; }
+        }
+
+        .launch-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .launch-block .term {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .launch-block code {
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.82rem;
+            color: var(--green);
+            display: block;
+            line-height: 1.6;
+        }
+
+        .launch-block code .comment {
+            color: #444460;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 0 60px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
 </head>
 <body>
 
-  <h1>Home Assistant Custom</h1>
-  <p class="subtitle">Assistant domestique custom développé en Python, tournant sur un laptop dédié avec affichage holographique, télécommande PWA et bouton physique.</p>
+<div class="container">
 
-  <hr>
+    <!-- Hero -->
+    <header class="hero">
+        <div class="hero-badge">Projet personnel</div>
+        <h1>Home Assistant <span>Custom</span></h1>
+        <p>Assistant domestique développé en Python et Node.js, tournant sur un Raspberry Pi avec affichage holographique (pyramide 4 faces), télécommande web et bouton physique.</p>
+    </header>
 
-  <h2>Architecture</h2>
-  <p>Le système repose sur <strong>un seul process Python</strong> qui combine le backend (logique métier) et le rendu holographique (Pygame). La télécommande PWA sert uniquement à la configuration. Un bouton physique sur le boîtier gère les actions rapides.</p>
+    <!-- Architecture -->
+    <section>
+        <h2 class="section-title"><span class="num">01</span>Architecture</h2>
 
-  <pre class="diagram">┌──────────────────────────────────────────┐
-│  Laptop dédié — Process Python unique    │
-│                                          │
-│  [Backend]           [Hologramme]        │
-│   Logique métier      Rendu Pygame       │
-│   Scheduler           (passif)           │
-│   Modules                                │
-│                                          │
-│  [Serveur WebSocket :8765]               │
-└──────────────────────────────────────────┘
-        │                       │
-        ▼                       ▼
- [Télécommande PWA]     [Bouton physique]
-  Configuration          Stop / Pause / Next</pre>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">Le système repose sur <strong style="color:#fff;">2 process</strong> tournant sur le même Raspberry Pi. L'hologramme est une app web affichée dans Firefox en mode kiosk.</p>
 
-  <p><strong>Principe fondamental</strong> : le backend est le cerveau unique. Il décide de tout — les frontends ne font qu'afficher et transmettre.</p>
+        <div class="process-grid">
+            <div class="process-card">
+                <div class="label">Process 1</div>
+                <h3>Backend Python</h3>
+                <p>Cerveau du système : logique métier, scheduler, modules, serveur WebSocket central.</p>
+            </div>
+            <div class="process-card">
+                <div class="label">Process 2</div>
+                <h3>Serveur Node</h3>
+                <p>Sert les deux interfaces web (hologramme + télécommande) et proxy WebSocket authentifié.</p>
+            </div>
+        </div>
 
-  <hr>
+        <div class="arch-diagram">
+<pre>┌──────────────────────────────────────────────────┐
+│  Raspberry Pi — 2 process                        │
+│                                                  │
+│  ┌──────────────────────┐                        │
+│  │  Backend Python       │                       │
+│  │  Logique métier       │                       │
+│  │  Scheduler            │                       │
+│  │  Modules              │                       │
+│  │  Serveur WS :8765     │                       │
+│  └──────────┬────────────┘                       │
+│             │ WebSocket (localhost)               │
+│  ┌──────────▼────────────┐                       │
+│  │  Serveur Node :3000   │                       │
+│  │  /hologram → app web  │ ← Firefox kiosk       │
+│  │  /remote  → React SPA │ ← accès distant       │
+│  │  /ws      → proxy WS  │                       │
+│  └──────────┬────────────┘                       │
+│             │                                    │
+│  [Firefox kiosk] → localhost:3000/hologram       │
+│  [Bouton physique] ──GPIO/USB──► Backend         │
+└──────────────────────────────────────────────────┘
+        │
+        ▼ (Cloudflare Tunnel)
+ [Télécommande sur mobile]
+  navigateur → https://remote.mondomaine.com</pre>
+        </div>
 
-  <h2>Stack technique</h2>
+        <div class="principle" style="margin-top: 20px;">
+            <strong>Principe fondamental :</strong> le backend est le cerveau unique. Il décide de tout — l'hologramme et la télécommande ne font qu'afficher et transmettre.
+        </div>
+    </section>
 
-  <h3>Backend + Hologramme (process unifié)</h3>
-  <table>
-    <thead>
-      <tr><th>Technologie</th><th>Rôle</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><strong>Python 3.11+</strong></td><td>Langage principal</td></tr>
-      <tr><td><strong>asyncio</strong></td><td>Orchestration async — rendu, WebSocket, scheduler et modules dans un seul process</td></tr>
-      <tr><td><strong>Pygame</strong></td><td>Rendu graphique plein écran de l'hologramme</td></tr>
-      <tr><td><strong>websockets</strong></td><td>Serveur WebSocket async pour la télécommande</td></tr>
-      <tr><td><strong>APScheduler</strong></td><td>Planification des réveils et routines</td></tr>
-      <tr><td><strong>SQLite</strong></td><td>Persistance locale (configs, historique, préférences)</td></tr>
-      <tr><td><strong>bleak</strong></td><td>Gestion async du Bluetooth (enceintes)</td></tr>
-      <tr><td><strong>GPIO / evdev</strong></td><td>Lecture du bouton physique</td></tr>
-    </tbody>
-  </table>
+    <!-- Hologramme -->
+    <section>
+        <h2 class="section-title"><span class="num">02</span>Affichage holographique</h2>
 
-  <h3>Télécommande PWA</h3>
-  <table>
-    <thead>
-      <tr><th>Technologie</th><th>Rôle</th></tr>
-    </thead>
-    <tbody>
-      <tr><td><strong>React</strong></td><td>Interface de configuration</td></tr>
-      <tr><td><strong>WebSocket natif</strong></td><td>Communication bidirectionnelle avec le backend</td></tr>
-      <tr><td><strong>PWA manifest</strong></td><td>Installation optionnelle sur mobile, cache offline</td></tr>
-    </tbody>
-  </table>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">L'hologramme utilise une <strong style="color:#fff;">pyramide de Pepper's ghost</strong> à 4 faces en verre/plexiglas. L'écran affiche 4 copies du contenu, chacune orientée vers une face.</p>
 
-  <hr>
+        <div class="pyramid-diagram">
+<pre>         ┌─────────┐
+         │   180°   │
+         │  (haut)  │
+┌────────┼──────────┼────────┐
+│  90°   │   NOIR   │  270°  │
+│(gauche)│ (centre) │(droite)│
+└────────┼──────────┼────────┘
+         │    0°    │
+         │  (bas)   │
+         └──────────┘
 
-  <h2>Communication</h2>
-  <table>
-    <thead>
-      <tr><th>Liaison</th><th>Protocole</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>Backend ↔ Hologramme</td><td>Event bus asyncio (même process, en mémoire)</td></tr>
-      <tr><td>Backend ↔ Télécommande</td><td>WebSocket sur port 8765</td></tr>
-      <tr><td>Backend ↔ Bouton physique</td><td>GPIO / USB / evdev</td></tr>
-      <tr><td>Accès distant</td><td>Cloudflare Tunnel (pas d'IP fixe requise)</td></tr>
-    </tbody>
-  </table>
+Fond noir = transparent sur le verre
+→ seul le contenu "flotte" dans la pyramide</pre>
+        </div>
 
-  <hr>
+        <div class="modules-grid" style="margin-top: 20px;">
+            <div class="module-card">
+                <span class="tag tag-v1">Rendu</span>
+                <h4>Avatar animé</h4>
+                <p>Clips vidéo H.264 pré-rendus dans Unreal Engine sur fond noir. ~20 états (idle, talking, alarm, alert…).</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-v1">Overlay</span>
+                <h4>Données dynamiques</h4>
+                <p>Heure, météo, texte en HTML/CSS superposés à la vidéo. Mis à jour en temps réel via WebSocket.</p>
+            </div>
+        </div>
+    </section>
 
-  <h2>Modules</h2>
+    <!-- Stack technique -->
+    <section>
+        <h2 class="section-title"><span class="num">03</span>Stack technique</h2>
 
-  <h3>V1</h3>
-  <ul>
-    <li><strong>Réveil / Scheduler</strong> — Alarmes et routines planifiées, configurable via télécommande, stoppable via bouton physique</li>
-    <li><strong>Audio / Bluetooth</strong> — Lecture audio native, routage vers enceintes BT via bleak</li>
-    <li><strong>Hologramme</strong> — Rendu passif Pygame, reçoit les commandes d'affichage du backend</li>
-    <li><strong>Bouton physique</strong> — Appui court = pause/play, double appui = next, appui long = stop réveil</li>
-  </ul>
+        <div class="tech-group">
+            <h3>Backend Python</h3>
+            <table>
+                <thead><tr><th>Technologie</th><th>Rôle</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Python 3.11+</code></td><td>Langage principal</td></tr>
+                    <tr><td><code>asyncio</code></td><td>Orchestration async — scheduler, modules, WS</td></tr>
+                    <tr><td><code>websockets</code></td><td>Serveur WebSocket central (port 8765)</td></tr>
+                    <tr><td><code>APScheduler</code></td><td>Planification des réveils et routines</td></tr>
+                    <tr><td><code>SQLite</code></td><td>Persistance locale (configs, historique)</td></tr>
+                    <tr><td><code>bleak</code></td><td>Gestion async du Bluetooth (enceintes)</td></tr>
+                    <tr><td><code>GPIO / evdev</code></td><td>Lecture du bouton physique</td></tr>
+                </tbody>
+            </table>
+        </div>
 
-  <h3>Futur</h3>
-  <ul>
-    <li><strong>Spotify</strong> — Contrôle via API Spotify Connect</li>
-    <li><strong>Caméra</strong> — Surveillance vidéo via OpenCV, détection de mouvement</li>
-    <li><strong>Domotique</strong> — Appareils connectés (MQTT sera ajouté à ce moment-là)</li>
-    <li><strong>Commande vocale</strong> — Whisper : voix → texte → intent → action</li>
-  </ul>
+        <div class="tech-group">
+            <h3>Serveur Node</h3>
+            <table>
+                <thead><tr><th>Technologie</th><th>Rôle</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Node.js</code></td><td>Serveur HTTP unique (port 3000)</td></tr>
+                    <tr><td><code>Express</code></td><td>Routes /hologram, /remote, /api</td></tr>
+                    <tr><td><code>JWT</code></td><td>Auth télécommande (PIN → token)</td></tr>
+                    <tr><td><code>ws</code></td><td>Proxy WebSocket authentifié vers le backend</td></tr>
+                </tbody>
+            </table>
+        </div>
 
-  <hr>
+        <div class="tech-group">
+            <h3>Hologramme (app web)</h3>
+            <table>
+                <thead><tr><th>Technologie</th><th>Rôle</th></tr></thead>
+                <tbody>
+                    <tr><td><code>HTML/CSS/JS</code></td><td>Rendu pyramide 4 faces + overlay</td></tr>
+                    <tr><td><code>&lt;video&gt;</code></td><td>Lecture clips avatar (décodage H.264 hardware)</td></tr>
+                    <tr><td><code>WebSocket</code></td><td>Réception des commandes du backend</td></tr>
+                    <tr><td><code>Firefox kiosk</code></td><td>Affichage plein écran sur l'écran du RPi</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 
-  <h2>Exemple de flux : le réveil</h2>
-  <ol>
-    <li><strong>7h30</strong> — Le scheduler détecte l'heure du réveil</li>
-    <li><strong>Backend</strong> — Lance l'audio vers les enceintes Bluetooth (volume progressif)</li>
-    <li><strong>Hologramme</strong> — Affiche l'écran réveil (heure, météo, agenda)</li>
-    <li><strong>Bouton</strong> — L'utilisateur fait un appui long → événement <code>button.long_press</code></li>
-    <li><strong>Backend</strong> — Coupe l'audio, remet l'hologramme en mode normal</li>
-  </ol>
+    <!-- Communication -->
+    <section>
+        <h2 class="section-title"><span class="num">04</span>Communication</h2>
 
-  <hr>
+        <p style="margin-bottom: 20px; color: var(--text-muted);">Tous les échanges passent par le <strong style="color:#fff;">serveur WebSocket du backend</strong> (<code>localhost:8765</code>). Le serveur Node fait proxy pour les clients web.</p>
 
-  <h2>Structure du projet</h2>
-  <pre>home-assistant/
-├── core/
-│   ├── main.py              # Point d'entrée
-│   ├── event_bus.py          # Bus d'événements asyncio
-│   └── scheduler.py          # APScheduler wrapper
-├── modules/
-│   ├── audio/                # Lecture audio + Bluetooth
-│   ├── display/              # Rendu Pygame (hologramme)
-│   ├── button/               # Lecture bouton physique
-│   ├── spotify/              # (futur)
-│   ├── camera/               # (futur)
-│   └── voice/                # (futur)
-├── api/
-│   └── ws_server.py          # Serveur WebSocket
-├── db/
-│   └── database.py           # SQLite wrapper
-├── remote/                   # Télécommande PWA (React)
-│   ├── src/
-│   └── public/
-├── config.yaml               # Configuration générale
-├── requirements.txt
-└── README.md</pre>
+        <table class="comm-table">
+            <thead><tr><th>Liaison</th><th>Protocole</th></tr></thead>
+            <tbody>
+                <tr><td>Backend ↔ Node (proxy)</td><td>WebSocket local <code>ws://localhost:8765</code></td></tr>
+                <tr><td>Node ↔ Hologramme</td><td>WebSocket local <code>ws://localhost:3000/ws</code></td></tr>
+                <tr><td>Node ↔ Télécommande</td><td>WebSocket via Cloudflare Tunnel (auth JWT)</td></tr>
+                <tr><td>Backend ↔ Bouton physique</td><td>GPIO / USB / evdev</td></tr>
+                <tr><td>Accès distant</td><td>Cloudflare Tunnel (télécommande uniquement)</td></tr>
+            </tbody>
+        </table>
 
-  <hr>
+        <div class="msg-example">
+            <h4>Format des messages WebSocket</h4>
+<pre><span class="punct">{</span>
+  <span class="key">"type"</span><span class="punct">:</span> <span class="str">"display.update"</span><span class="punct">,</span>
+  <span class="key">"payload"</span><span class="punct">:</span> <span class="punct">{</span>
+    <span class="key">"screen"</span><span class="punct">:</span> <span class="str">"alarm"</span><span class="punct">,</span>
+    <span class="key">"data"</span><span class="punct">:</span> <span class="punct">{</span> <span class="key">"time"</span><span class="punct">:</span> <span class="str">"07:30"</span><span class="punct">,</span> <span class="key">"weather"</span><span class="punct">:</span> <span class="str">"15°C"</span> <span class="punct">}</span>
+  <span class="punct">}</span>
+<span class="punct">}</span></pre>
+            <p class="msg-note">Chaque client s'identifie à la connexion (<code>hologram</code> ou <code>remote</code>) pour que le backend puisse router les messages.</p>
+        </div>
+    </section>
 
-  <h2>Installation</h2>
+    <!-- Modules -->
+    <section>
+        <h2 class="section-title"><span class="num">05</span>Modules</h2>
 
-  <pre><code># Cloner le projet
-git clone https://github.com/user/home-assistant.git
-cd home-assistant
+        <div class="modules-grid">
+            <div class="module-card">
+                <span class="tag tag-v1">V1</span>
+                <h4>Réveil / Scheduler</h4>
+                <p>Alarmes et routines planifiées, configurable via télécommande, stoppable via bouton physique.</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-v1">V1</span>
+                <h4>Audio / Bluetooth</h4>
+                <p>Lecture audio native, routage vers enceintes BT via bleak.</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-v1">V1</span>
+                <h4>Hologramme</h4>
+                <p>App web pyramide 4 faces, clips vidéo pré-rendus + overlay dynamique HTML/CSS.</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-v1">V1</span>
+                <h4>Bouton physique</h4>
+                <p>Appui court = pause/play, double appui = next, appui long = stop réveil.</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-future">Futur</span>
+                <h4>Spotify</h4>
+                <p>Contrôle via API Spotify Connect.</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-future">Futur</span>
+                <h4>Caméra</h4>
+                <p>Surveillance vidéo via OpenCV, détection de mouvement.</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-future">Futur</span>
+                <h4>Domotique</h4>
+                <p>Appareils connectés (MQTT sera ajouté à ce moment-là).</p>
+            </div>
+            <div class="module-card">
+                <span class="tag tag-future">Futur</span>
+                <h4>Commande vocale</h4>
+                <p>Whisper : voix → texte → intent → action.</p>
+            </div>
+        </div>
+    </section>
 
-# Installer les dépendances Python
-pip install -r requirements.txt
+    <!-- Flux exemple -->
+    <section>
+        <h2 class="section-title"><span class="num">06</span>Exemple de flux : le réveil</h2>
 
-# Lancer le système
-python core/main.py</code></pre>
+        <ol class="flow-list">
+            <li><strong>7h30</strong> — Le scheduler du backend détecte l'heure du réveil</li>
+            <li><strong>Backend</strong> — Lance l'audio vers les enceintes Bluetooth (volume progressif)</li>
+            <li><strong>Backend → Hologramme</strong> — Envoie <code>display.update</code> avec <code>screen: "alarm"</code></li>
+            <li><strong>Hologramme</strong> — Joue le clip <code>alarm.mp4</code>, affiche l'overlay (heure, météo)</li>
+            <li><strong>Bouton</strong> — L'utilisateur fait un appui long → événement <code>button.long_press</code></li>
+            <li><strong>Backend</strong> — Coupe l'audio, envoie <code>screen: "idle"</code> → transition vers <code>idle.mp4</code></li>
+        </ol>
+    </section>
 
-  <h3>Télécommande PWA</h3>
-  <pre><code>cd remote
-npm install
-npm run build
-# Les fichiers statiques sont servis par le backend WebSocket</code></pre>
+    <!-- Structure -->
+    <section>
+        <h2 class="section-title"><span class="num">07</span>Structure du projet</h2>
 
-  <h3>Accès distant</h3>
-  <pre><code># Installer cloudflared
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
-chmod +x cloudflared
+        <div class="tree">
+<pre><span class="folder">holo_project/</span>
+├── <span class="folder">backend/</span>                    <span class="comment"># Process 1 — Backend Python</span>
+│   ├── <span class="file">main.py</span>                 <span class="comment"># Point d'entrée</span>
+│   ├── <span class="file">config.yaml</span>             <span class="comment"># Configuration générale</span>
+│   ├── <span class="folder">core/</span>                    <span class="comment"># Socle technique</span>
+│   │   ├── <span class="file">config.py</span>            <span class="comment"># Loader YAML</span>
+│   │   ├── <span class="file">logger.py</span>            <span class="comment"># Logger console</span>
+│   │   ├── <span class="file">event_bus.py</span>         <span class="comment"># Pub/sub async</span>
+│   │   ├── <span class="file">protocol.py</span>          <span class="comment"># Messages JSON + router</span>
+│   │   └── <span class="file">ws_server.py</span>         <span class="comment"># Serveur WebSocket</span>
+│   ├── <span class="folder">modules/</span>                 <span class="comment"># Modules métier (auto-discovery)</span>
+│   └── <span class="file">pyproject.toml</span>
+│
+├── <span class="folder">web_remote/</span>                 <span class="comment"># Process 2 — Serveur Node</span>
+│   ├── <span class="file">server.ts</span>               <span class="comment"># Express + auth + proxy WS</span>
+│   ├── <span class="folder">src/</span>                    <span class="comment"># React SPA (télécommande)</span>
+│   ├── <span class="folder">hologram/</span>               <span class="comment"># App web hologramme</span>
+│   │   ├── <span class="file">index.html</span>           <span class="comment"># Page pyramide 4 faces</span>
+│   │   ├── <span class="file">style.css</span>            <span class="comment"># Layout pyramide + overlay</span>
+│   │   ├── <span class="file">app.js</span>               <span class="comment"># Logique WS + machine à états</span>
+│   │   └── <span class="folder">clips/</span>              <span class="comment"># Vidéos avatar (H.264)</span>
+│   └── <span class="file">package.json</span>
+│
+├── <span class="folder">scripts/</span>
+│   └── <span class="file">runall.bat</span>              <span class="comment"># Lancement complet</span>
+│
+└── <span class="file">README.md</span></pre>
+        </div>
+    </section>
 
-# Créer le tunnel
-./cloudflared tunnel --url ws://localhost:8765</code></pre>
+    <!-- Lancement -->
+    <section>
+        <h2 class="section-title"><span class="num">08</span>Lancement</h2>
 
-  <hr>
+        <p style="margin-bottom: 16px; color: var(--text-muted);">Les 2 process + Firefox kiosk se lancent sur le Raspberry Pi :</p>
 
-  <h2>Configuration</h2>
-  <p>Le fichier <code>config.yaml</code> centralise tous les réglages :</p>
+        <div class="launch-blocks">
+            <div class="launch-block">
+                <div class="term">Terminal 1 — Backend</div>
+                <code><span class="comment"># À lancer en premier</span>
+cd backend
+python main.py</code>
+            </div>
+            <div class="launch-block">
+                <div class="term">Terminal 2 — Serveur Node</div>
+                <code>cd web_remote
+npm start</code>
+            </div>
+            <div class="launch-block">
+                <div class="term">Firefox kiosk</div>
+                <code>firefox --kiosk
+localhost:3000/hologram</code>
+            </div>
+        </div>
+    </section>
 
-  <pre><code>display:
-  fullscreen: true
-  resolution: [1920, 1080]
-  fps: 30
+</div>
 
-audio:
-  bluetooth_device: "JBL Flip 6"
-  volume_default: 50
-  volume_alarm_max: 80
-  volume_step_seconds: 30
-
-alarm:
-  default_sound: "sunrise.wav"
-  snooze_minutes: 9
-
-button:
-  type: "usb"  # gpio | usb | keyboard
-  short_press: "audio.toggle"
-  double_press: "audio.next"
-  long_press: "alarm.stop"
-
-websocket:
-  port: 8765
-  host: "0.0.0.0"</code></pre>
-
-  <hr>
-
-  <p><em>Projet personnel — Thomas Lemartinel, 2026.</em></p>
+<footer>
+    <div class="container">
+        Projet personnel — Thomas Lemartinel, 2026
+    </div>
+</footer>
 
 </body>
 </html>
