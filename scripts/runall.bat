@@ -22,7 +22,7 @@ echo.
 
 :: 2. Lancer le backend Python
 echo [2/3] Demarrage du backend Python...
-start "Backend Python" cmd /k "cd /d %ROOT%\backend && python main.py"
+start "Backend Python" cmd /k "cd /d %ROOT%\backend && uv run python main.py"
 timeout /t 2 /nobreak >nul
 
 :: 3. Lancer le serveur Node (sert le build + proxy WS)

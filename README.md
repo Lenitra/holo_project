@@ -24,7 +24,7 @@ L'hologramme est une **app web affichée dans Firefox en mode kiosk** sur l'écr
 │  │  Modules              │                       │
 │  │  Serveur WS :8765     │                       │
 │  └──────────┬────────────┘                       │
-│             │ WebSocket (localhost)               │
+│             │ WebSocket (localhost)              │
 │  ┌──────────▼────────────┐                       │
 │  │  Serveur Node :3000   │                       │
 │  │  /hologram → app web  │ ← Firefox kiosk       │
@@ -50,9 +50,6 @@ L'hologramme est une **app web affichée dans Firefox en mode kiosk** sur l'écr
 L'hologramme utilise une **pyramide de Pepper's ghost** à 4 faces en verre/plexiglas. L'écran affiche 4 copies du contenu, chacune orientée vers une face.
 
 ```
-         ┌─────────┐
-         │   180°   │
-         │  (haut)  │
 ┌────────┼──────────┼────────┐
 │  90°   │   NOIR   │  270°  │
 │(gauche)│ (centre) │(droite)│
@@ -85,40 +82,40 @@ Backend envoie "display.update" ───► App web hologramme
 
 ### Backend Python
 
-| Technologie      | Rôle                                             |
-| ---------------- | ------------------------------------------------ |
-| **Python 3.11+** | Langage principal                                |
-| **asyncio**      | Orchestration async — scheduler, modules, WS     |
-| **websockets**   | Serveur WebSocket central (port 8765)            |
-| **APScheduler**  | Planification des réveils et routines            |
-| **SQLite**       | Persistance locale (configs, historique)         |
-| **bleak**        | Gestion async du Bluetooth (enceintes)           |
-| **GPIO / evdev** | Lecture du bouton physique                       |
+| Technologie      | Rôle                                         |
+| ---------------- | -------------------------------------------- |
+| **Python 3.11+** | Langage principal                            |
+| **asyncio**      | Orchestration async — scheduler, modules, WS |
+| **websockets**   | Serveur WebSocket central (port 8765)        |
+| **APScheduler**  | Planification des réveils et routines        |
+| **SQLite**       | Persistance locale (configs, historique)     |
+| **bleak**        | Gestion async du Bluetooth (enceintes)       |
+| **GPIO / evdev** | Lecture du bouton physique                   |
 
 ### Serveur Node
 
-| Technologie      | Rôle                                             |
-| ---------------- | ------------------------------------------------ |
-| **Node.js**      | Serveur HTTP unique (port 3000)                  |
-| **Express**      | Routes `/hologram`, `/remote`, `/api`            |
-| **JWT**          | Auth télécommande (PIN → token)                  |
-| **ws**           | Proxy WebSocket authentifié vers le backend      |
+| Technologie | Rôle                                        |
+| ----------- | ------------------------------------------- |
+| **Node.js** | Serveur HTTP unique (port 3000)             |
+| **Express** | Routes `/hologram`, `/remote`, `/api`       |
+| **JWT**     | Auth télécommande (PIN → token)             |
+| **ws**      | Proxy WebSocket authentifié vers le backend |
 
 ### Hologramme (app web)
 
-| Technologie      | Rôle                                             |
-| ---------------- | ------------------------------------------------ |
-| **HTML/CSS/JS**  | Rendu pyramide 4 faces + overlay                 |
-| **`<video>`**    | Lecture clips avatar (décodage H.264 hardware)   |
-| **WebSocket**    | Réception des commandes du backend               |
-| **Firefox kiosk**| Affichage plein écran sur l'écran du RPi         |
+| Technologie       | Rôle                                           |
+| ----------------- | ---------------------------------------------- |
+| **HTML/CSS/JS**   | Rendu pyramide 4 faces + overlay               |
+| **`<video>`**     | Lecture clips avatar (décodage H.264 hardware) |
+| **WebSocket**     | Réception des commandes du backend             |
+| **Firefox kiosk** | Affichage plein écran sur l'écran du RPi       |
 
 ### Télécommande (React SPA)
 
-| Technologie      | Rôle                                             |
-| ---------------- | ------------------------------------------------ |
-| **React**        | Interface de configuration                       |
-| **WebSocket**    | Communication via proxy Node authentifié         |
+| Technologie   | Rôle                                     |
+| ------------- | ---------------------------------------- |
+| **React**     | Interface de configuration               |
+| **WebSocket** | Communication via proxy Node authentifié |
 
 ---
 
@@ -126,20 +123,23 @@ Backend envoie "display.update" ───► App web hologramme
 
 Tous les échanges passent par le **serveur WebSocket du backend** (`localhost:8765`). Le serveur Node fait proxy pour les clients web.
 
-| Liaison                    | Protocole                                        |
-| -------------------------- | ------------------------------------------------ |
-| Backend ↔ Node (proxy)     | WebSocket local (`ws://localhost:8765`)           |
-| Node ↔ Hologramme          | WebSocket local (`ws://localhost:3000/ws`)        |
-| Node ↔ Télécommande        | WebSocket via Cloudflare Tunnel (auth JWT)        |
-| Backend ↔ Bouton physique  | GPIO / USB / evdev                               |
-| Accès distant              | Cloudflare Tunnel (télécommande uniquement)      |
+| Liaison                   | Protocole                                   |
+| ------------------------- | ------------------------------------------- |
+| Backend ↔ Node (proxy)    | WebSocket local (`ws://localhost:8765`)     |
+| Node ↔ Hologramme         | WebSocket local (`ws://localhost:3000/ws`)  |
+| Node ↔ Télécommande       | WebSocket via Cloudflare Tunnel (auth JWT)  |
+| Backend ↔ Bouton physique | GPIO / USB / evdev                          |
+| Accès distant             | Cloudflare Tunnel (télécommande uniquement) |
 
 ### Format des messages WebSocket
 
 ```json
 {
   "type": "display.update",
-  "payload": { "screen": "alarm", "data": { "time": "07:30", "weather": "15°C" } }
+  "payload": {
+    "screen": "alarm",
+    "data": { "time": "07:30", "weather": "15°C" }
+  }
 }
 ```
 

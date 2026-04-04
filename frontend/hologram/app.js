@@ -90,8 +90,6 @@ function handleMessage(msg) {
 // --- Machine à états vidéo ---
 
 function changeScreen(screen, data) {
-  if (screen === currentScreen) return;
-
   console.log(`[holo] ${currentScreen} → ${screen}`);
   currentScreen = screen;
 
@@ -104,15 +102,17 @@ function changeScreen(screen, data) {
 
     setTimeout(() => {
       video.src = clipSrc;
-      video.play().catch(() => {}); // Autoplay peut échouer sans interaction
+      video.play().catch(() => {});
       video.classList.remove("fade-out");
       video.classList.add("fade-in");
     }, 300);
   });
 
-  // Mettre à jour l'overlay si des données accompagnent le changement
+  // Mettre à jour l'overlay ou restaurer l'horloge sur idle
   if (data) {
     updateOverlay(data);
+  } else if (screen === "idle") {
+    showClock();
   }
 }
 
@@ -151,19 +151,21 @@ function restartVideo() {
   });
 }
 
-// --- Horloge par défaut (mise à jour chaque minute) ---
+// --- Horloge par défaut (mise à jour chaque 30 s) ---
+
+function showClock() {
+  const now = new Date();
+  const time = now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  updateOverlay({ time });
+}
 
 function startClock() {
-  function tick() {
-    const now = new Date();
-    const time = now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
-    // N'afficher l'horloge que sur l'écran idle
+  showClock();
+  setInterval(() => {
     if (currentScreen === "idle") {
-      updateOverlay({ time });
+      showClock();
     }
-  }
-  tick();
-  setInterval(tick, 30_000);
+  }, 30_000);
 }
 
 // --- Démarrage ---
