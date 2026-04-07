@@ -12,13 +12,16 @@
     "start": "npm run build && npx tsx server.ts"
   },
   "dependencies": {
+    "@types/multer": "^2.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-router-dom": "^7.14.0",
     "ws": "^8.20.0"
   },
   "devDependencies": {

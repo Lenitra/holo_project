@@ -25,14 +25,17 @@ echo [2/3] Demarrage du backend Python...
 start "Backend Python" cmd /k "cd /d %ROOT%\backend && uv run python main.py"
 timeout /t 2 /nobreak >nul
 
+echo.
+echo Delai de lancement pour le backend...
+timeout /t 5 /nobreak >nul
+echo.
+
+
 :: 3. Lancer le serveur Node (sert le build + proxy WS)
 echo [3/3] Demarrage du serveur Node...
 start "Frontend" cmd /k "cd /d %ROOT%\frontend && npx tsx server.ts"
 timeout /t 2 /nobreak >nul
 
-:: 4. Lancer Firefox kiosk sur l'hologramme
-echo [4/4] Lancement de l'hologramme (Firefox kiosk)...
-start "" "C:\Program Files\Mozilla Firefox\firefox.exe" -P "holokiosk" --kiosk "http://localhost:3000/hologram"
 
 echo.
 echo ========================================

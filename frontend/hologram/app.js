@@ -2,11 +2,13 @@
  * Hologramme — Logique client.
  *
  * Se connecte au backend via WebSocket (sans auth, connexion locale).
- * Gère la machine à états des clips vidéo et l'overlay dynamique.
+ * Gère la machine à états des clips vidéo, l'overlay dynamique
+ * et la lecture audio (réveil).
  */
 
 const WS_URL = `ws://${location.host}/ws/hologram`;
 const CLIPS_PATH = "/hologram/clips";
+const MUSIC_PATH = "/music";
 
 // --- Éléments DOM ---
 const videos = document.querySelectorAll(".avatar");
@@ -16,6 +18,27 @@ const overlays = document.querySelectorAll(".overlay");
 let currentScreen = "idle";
 let ws = null;
 let reconnectTimer = null;
+
+// --- Audio (réveil) ---
+let alarmAudio = null;
+
+function playMusic(filename) {
+  stopMusic();
+  alarmAudio = new Audio(`${MUSIC_PATH}/${encodeURIComponent(filename)}`);
+  alarmAudio.loop = true;
+  alarmAudio.play().catch((e) => console.warn("[holo] Erreur lecture audio :", e));
+  console.log("[holo] Audio ▶", filename);
+}
+
+function stopMusic() {
+  if (alarmAudio) {
+    alarmAudio.pause();
+    alarmAudio.currentTime = 0;
+    alarmAudio.src = "";
+    alarmAudio = null;
+    console.log("[holo] Audio ■ arrêté");
+  }
+}
 
 // --- WebSocket ---
 
@@ -93,6 +116,20 @@ function changeScreen(screen, data) {
   console.log(`[holo] ${currentScreen} → ${screen}`);
   currentScreen = screen;
 
+  // Arrêter l'audio si on quitte un écran (changement quelconque)
+  stopMusic();
+
+  // Écran éteint : tout masquer
+  if (screen === "off") {
+    videos.forEach((video) => {
+      video.pause();
+      video.classList.add("fade-out");
+      video.classList.remove("fade-in");
+    });
+    overlays.forEach((el) => { el.innerHTML = ""; });
+    return;
+  }
+
   const clipSrc = `${CLIPS_PATH}/${screen}.mp4`;
 
   // Fade out → change source → fade in (sur les 4 faces)
@@ -107,6 +144,11 @@ function changeScreen(screen, data) {
       video.classList.add("fade-in");
     }, 300);
   });
+
+  // Lancer l'audio si c'est un réveil
+  if (data && data.music) {
+    playMusic(data.music);
+  }
 
   // Mettre à jour l'overlay ou restaurer l'horloge sur idle
   if (data) {
@@ -168,13 +210,32 @@ function startClock() {
   }, 30_000);
 }
 
-// --- Démarrage ---
+// --- Arrêt du réveil par Ctrl gauche ---
 
-connect();
-startClock();
+document.addEventListener("keydown", (e) => {
+  if (e.code === "ControlLeft" && ws && ws.readyState === WebSocket.OPEN) {
+    console.log("[holo] Ctrl gauche → alarm.stop");
+    ws.send(JSON.stringify({ type: "alarm.stop", payload: {} }));
+  }
+});
 
-// Charger le clip idle par défaut si disponible
-videos.forEach((video) => {
-  video.src = `${CLIPS_PATH}/idle.mp4`;
-  video.play().catch(() => {});
+// --- Démarrage (après interaction utilisateur pour débloquer l'audio) ---
+
+document.getElementById("start-btn").addEventListener("click", () => {
+  // Débloquer l'autoplay audio avec un son silencieux
+  const unlock = new Audio();
+  unlock.play().catch(() => {});
+
+  // Cacher l'écran de démarrage, afficher la pyramide
+  document.getElementById("start-screen").remove();
+  document.querySelector(".pyramid").style.display = "";
+
+  // Lancer l'app
+  connect();
+  startClock();
+
+  videos.forEach((video) => {
+    video.src = `${CLIPS_PATH}/idle.mp4`;
+    video.play().catch(() => {});
+  });
 });

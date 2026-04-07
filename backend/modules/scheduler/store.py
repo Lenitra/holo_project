@@ -10,7 +10,8 @@ Chaque routine :
     "action": "weather.tts",
     "time": "07:30",
     "days": [1, 2, 3, 4, 5],   # 1=lundi … 7=dimanche (ISO)
-    "enabled": true
+    "enabled": true,
+    "config": {}                # paramètres spécifiques à l'action
   }
 """
 
@@ -40,6 +41,10 @@ class RoutineStore:
         if self._path.exists():
             try:
                 self._routines = json.loads(self._path.read_text("utf-8"))
+                # Migration : ajouter config si absent
+                for r in self._routines:
+                    if "config" not in r:
+                        r["config"] = {}
                 log.info("Routines chargées : %d", len(self._routines))
             except (json.JSONDecodeError, OSError) as e:
                 log.error("Erreur lecture routines : %s", e)
@@ -59,7 +64,15 @@ class RoutineStore:
     def get(self, routine_id: str) -> dict[str, Any] | None:
         return next((r for r in self._routines if r["id"] == routine_id), None)
 
-    def add(self, name: str, action: str, time: str, days: list[int], enabled: bool = True) -> dict[str, Any]:
+    def add(
+        self,
+        name: str,
+        action: str,
+        time: str,
+        days: list[int],
+        enabled: bool = True,
+        config: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         routine = {
             "id": uuid.uuid4().hex[:8],
             "name": name,
@@ -67,6 +80,7 @@ class RoutineStore:
             "time": time,
             "days": sorted(days),
             "enabled": enabled,
+            "config": config or {},
         }
         self._routines.append(routine)
         self._save()
@@ -77,7 +91,7 @@ class RoutineStore:
         routine = self.get(routine_id)
         if routine is None:
             return None
-        for key in ("name", "action", "time", "days", "enabled"):
+        for key in ("name", "action", "time", "days", "enabled", "config"):
             if key in fields:
                 routine[key] = fields[key]
         if "days" in fields:

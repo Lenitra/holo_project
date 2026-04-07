@@ -19,6 +19,8 @@ dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 import express from "express";
 import jwt from "jsonwebtoken";
+import multer from "multer";
+import fs from "fs";
 import { WebSocketServer, WebSocket } from "ws";
 import http from "http";
 
@@ -94,9 +96,102 @@ app.get("/api/auth/verify", (req, res) => {
   catch { res.status(401).json({ valid: false }); }
 });
 
+// --- Settings API (city config) ---
+
+const SETTINGS_PATH = path.join(__dirname, "..", "backend", "data", "settings.json");
+
+function readSettings(): Record<string, unknown> {
+  try {
+    if (fs.existsSync(SETTINGS_PATH)) return JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
+  } catch {}
+  return {};
+}
+
+function writeSettings(settings: Record<string, unknown>) {
+  const dir = path.dirname(SETTINGS_PATH);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), "utf-8");
+}
+
+app.get("/api/settings/city", (_req, res) => {
+  const settings = readSettings();
+  res.json(settings.city || { name: "Toulouse", latitude: 43.6047, longitude: 1.4442 });
+});
+
+app.post("/api/settings/city", (req, res) => {
+  const { name, latitude, longitude } = req.body;
+  if (!name || latitude == null || longitude == null) {
+    res.status(400).json({ error: "Champs requis : name, latitude, longitude" });
+    return;
+  }
+  const settings = readSettings();
+  settings.city = { name, latitude: Number(latitude), longitude: Number(longitude) };
+  writeSettings(settings);
+  res.json(settings.city);
+});
+
+// --- Music API (upload / list / delete) ---
+
+const MUSIC_DIR = path.join(__dirname, "..", "backend", "data", "music");
+
+// S'assurer que le dossier existe
+if (!fs.existsSync(MUSIC_DIR)) fs.mkdirSync(MUSIC_DIR, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, MUSIC_DIR),
+    filename: (_req, file, cb) => {
+      // Garder le nom original, nettoyé
+      const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+      cb(null, safe);
+    },
+  }),
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === "audio/mpeg" || file.originalname.endsWith(".mp3")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Seuls les fichiers MP3 sont acceptés"));
+    }
+  },
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20 Mo max
+});
+
+app.get("/api/music", (_req, res) => {
+  try {
+    const files = fs.readdirSync(MUSIC_DIR)
+      .filter((f: string) => f.endsWith(".mp3"))
+      .map((f: string) => {
+        const stat = fs.statSync(path.join(MUSIC_DIR, f));
+        return { name: f, size: stat.size };
+      });
+    res.json({ files });
+  } catch {
+    res.json({ files: [] });
+  }
+});
+
+app.post("/api/music/upload", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    res.status(400).json({ error: "Aucun fichier reçu" });
+    return;
+  }
+  res.json({ name: req.file.filename, size: req.file.size });
+});
+
+app.delete("/api/music/:name", (req, res) => {
+  const filepath = path.join(MUSIC_DIR, req.params.name);
+  if (!fs.existsSync(filepath)) {
+    res.status(404).json({ error: "Fichier introuvable" });
+    return;
+  }
+  fs.unlinkSync(filepath);
+  res.json({ deleted: req.params.name });
+});
+
 // --- Fichiers statiques ---
 
 app.use("/hologram", express.static(path.join(__dirname, "hologram")));
+app.use("/music", express.static(MUSIC_DIR));
 app.use(express.static(path.join(__dirname, "dist")));
 
 app.get("/{*splat}", (_req, res) => {

@@ -1,15 +1,41 @@
 /**
  * Composant racine de la télécommande.
  *
- * Gère le routing entre l'écran de login (PIN) et le panneau remote.
- * L'état d'authentification détermine quel écran afficher.
+ * Gère l'authentification, le WebSocket, et le routing entre les pages.
+ * Le traitement des messages WS est centralisé ici pour que les logs
+ * s'accumulent même quand on navigue entre les pages.
  */
 
+import { useState, useEffect, useRef, useCallback } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { useWebSocket } from "./hooks/useWebSocket";
 import { LoginScreen } from "./components/LoginScreen";
-import { RemotePanel } from "./components/RemotePanel";
+import { Layout } from "./components/Layout";
+import { DashboardPage } from "./pages/DashboardPage";
+import { ConfigPage } from "./pages/ConfigPage";
+import { DebugPage } from "./pages/DebugPage";
 import "./App.css";
+
+interface WSMessage {
+  type: string;
+  payload: Record<string, unknown>;
+}
+
+interface ClientInfo {
+  id: string;
+  role: string;
+}
+
+interface Routine {
+  id: string;
+  name: string;
+  action: string;
+  time: string;
+  days: number[];
+  enabled: boolean;
+  config: Record<string, unknown>;
+}
 
 function App() {
   const { authenticated, loading, error, token, login, logout } = useAuth();
@@ -17,7 +43,63 @@ function App() {
     authenticated ? token : null
   );
 
-  // Écran de chargement pendant la vérification du token
+  const [log, setLog] = useState<string[]>([]);
+  const [clients, setClients] = useState<ClientInfo[]>([]);
+  const [routines, setRoutines] = useState<Routine[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const lastProcessed = useRef<WSMessage | null>(null);
+
+  // Demander le status et les routines à la connexion
+  useEffect(() => {
+    if (connected) {
+      send({ type: "status", payload: {} });
+      send({ type: "routine.list", payload: {} });
+    }
+  }, [connected]);
+
+  // Traiter les messages reçus (centralisé pour persister entre les pages)
+  useEffect(() => {
+    if (!lastMessage || lastMessage === lastProcessed.current) return;
+    lastProcessed.current = lastMessage;
+
+    if (lastMessage.type === "status" && lastMessage.payload.clients) {
+      const raw = lastMessage.payload.clients as Record<string, { role: string }>;
+      setClients(Object.entries(raw).map(([id, info]) => ({ id, role: info.role })));
+    }
+
+    if (lastMessage.type === "routine.list") {
+      setRoutines(lastMessage.payload.routines as Routine[]);
+    }
+    if (lastMessage.type === "routine.added") {
+      setRoutines((prev) => [...prev, lastMessage.payload as unknown as Routine]);
+    }
+    if (lastMessage.type === "routine.updated") {
+      const updated = lastMessage.payload as unknown as Routine;
+      setRoutines((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+    }
+    if (lastMessage.type === "routine.deleted") {
+      const id = lastMessage.payload.id as string;
+      setRoutines((prev) => prev.filter((r) => r.id !== id));
+    }
+
+    setLog((prev) => [...prev.slice(-49), `← ${lastMessage.type}: ${JSON.stringify(lastMessage.payload)}`]);
+    setUnreadCount((prev) => prev + 1);
+  }, [lastMessage]);
+
+  // Wrapper send qui ajoute au log
+  const handleSend = useCallback((msg: WSMessage) => {
+    send(msg);
+    setLog((prev) => [
+      ...prev.slice(-49),
+      `→ ${msg.type} ${Object.keys(msg.payload).length ? JSON.stringify(msg.payload) : ""}`,
+    ]);
+  }, [send]);
+
+  const handleMessagesSeen = useCallback(() => {
+    setUnreadCount(0);
+  }, []);
+
+  // Écran de chargement
   if (loading && !error) {
     return (
       <div className="loading-screen">
@@ -32,14 +114,17 @@ function App() {
     return <LoginScreen onSubmit={login} error={error} loading={loading} />;
   }
 
-  // Authentifié → panneau remote
+  // Authentifié → app avec navigation
   return (
-    <RemotePanel
-      connected={connected}
-      lastMessage={lastMessage}
-      send={send}
-      onLogout={logout}
-    />
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout connected={connected} onLogout={logout} unreadCount={unreadCount} />}>
+          <Route index element={<DashboardPage connected={connected} routines={routines} onSend={handleSend} />} />
+          <Route path="config" element={<ConfigPage />} />
+          <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} onSeen={handleMessagesSeen} />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -158,35 +158,454 @@ body {
 }
 
 /* ==========================================================================
-   Remote panel
+   App layout (sidebar + main)
    ========================================================================== */
 
-.remote-panel {
-  max-width: 500px;
-  margin: 0 auto;
-  padding: 24px;
+.app-layout {
+  display: flex;
   min-height: 100dvh;
 }
 
-/* Header */
-.remote-header {
+/* Hamburger button — hidden on desktop */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  padding: 12px 9px;
+  cursor: pointer;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* When menu is open, hide the hamburger so it doesn't overlap the sidebar */
+.hamburger.open {
+  display: none !important;
+}
+
+.hamburger span {
+  display: block;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all 0.25s;
+  transform-origin: center;
+}
+
+/* Overlay backdrop — hidden on desktop */
+.nav-overlay {
+  display: none;
+}
+
+/* Sidebar navigation */
+.nav-sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+}
+
+.nav-brand-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 24px;
   margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
-.remote-header h1 {
+.nav-brand {
   font-size: 1.4rem;
+  font-weight: 700;
   color: #fff;
+  letter-spacing: 1px;
 }
 
-.remote-header-right {
+/* Close button inside sidebar — hidden on desktop */
+.nav-close {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.nav-close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: rgba(124, 111, 247, 0.05);
+}
+
+.nav-link.active {
+  color: #fff;
+  background: rgba(124, 111, 247, 0.1);
+  border-left-color: var(--accent);
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-label {
+  flex: 1;
+}
+
+.nav-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.nav-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nav-status-row {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.nav-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.btn-hologram {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 8px 14px;
+  background: rgba(124, 111, 247, 0.1);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  color: var(--accent);
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.btn-hologram:hover {
+  background: rgba(124, 111, 247, 0.2);
+}
+
+.nav-footer .btn-logout {
+  width: 100%;
+  text-align: center;
+}
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  padding: 32px;
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.page-title {
+  font-size: 1.3rem;
+  color: #fff;
+  margin-bottom: 28px;
+}
+
+/* ==========================================================================
+   Pages
+   ========================================================================== */
+
+.dashboard-page,
+.debug-page {
+  width: 100%;
+}
+
+.remote-log h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   Routine category selector
+   ========================================================================== */
+
+.routine-category-pick {
+  display: flex;
+  gap: 8px;
+}
+
+.category-btn {
+  flex: 1;
+  padding: 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.category-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Routine name row with badge */
+.routine-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.routine-cat-badge {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.routine-cat-badge.cat-weather\.tts {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--green);
+}
+
+.routine-cat-badge.cat-alarm {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--red);
+}
+
+/* Alarm config in form */
+.alarm-config {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.config-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.config-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ==========================================================================
+   Config page
+   ========================================================================== */
+
+.config-page {
+  width: 100%;
+}
+
+.config-section {
+  margin-bottom: 32px;
+}
+
+.config-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.config-section-header h3 {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-upload {
+  display: inline-block;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+
+.btn-upload:hover {
+  border-color: var(--accent);
+  background: rgba(124, 111, 247, 0.08);
+}
+
+.btn-upload.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.config-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+
+.music-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.music-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.music-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.music-name {
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.music-size {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+
+/* City config */
+.city-current {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+}
+
+.city-name {
+  font-size: 0.95rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.city-coords {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+
+.city-search-wrapper {
+  position: relative;
+}
+
+.city-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-top: 4px;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.city-result-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.city-result-btn:last-child {
+  border-bottom: none;
+}
+
+.city-result-btn:hover {
+  background: rgba(124, 111, 247, 0.1);
+}
+
+.city-result-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .status-dot {
@@ -197,12 +616,6 @@ body {
 
 .status-dot.online { background: var(--green); }
 .status-dot.offline { background: var(--red); }
-
-.status-text {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-right: 8px;
-}
 
 .btn-logout {
   background: none;
@@ -257,6 +670,26 @@ body {
 .action-btn-weather:hover:not(:disabled) {
   border-color: var(--green);
   background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(124, 111, 247, 0.15));
+}
+
+.action-btn-off {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.action-btn-off:hover:not(:disabled) {
+  border-color: var(--red);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.action-btn-on {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.action-btn-on:hover:not(:disabled) {
+  border-color: var(--green);
+  background: rgba(74, 222, 128, 0.1);
 }
 
 /* ==========================================================================
@@ -475,6 +908,7 @@ body {
   font-family: 'Cascadia Code', 'Fira Code', monospace;
 }
 
+.btn-edit-routine,
 .btn-delete-routine {
   background: none;
   border: none;
@@ -486,9 +920,18 @@ body {
   transition: all 0.15s;
 }
 
+.btn-edit-routine:hover {
+  color: var(--accent);
+  background: rgba(124, 111, 247, 0.1);
+}
+
 .btn-delete-routine:hover {
   color: var(--red);
   background: rgba(248, 113, 113, 0.1);
+}
+
+.routine-card.routine-editing {
+  border-color: var(--accent);
 }
 
 /* Clients list */
@@ -551,13 +994,6 @@ body {
 }
 
 /* Message log */
-.remote-log h3 {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
 
 .log-entries {
   background: var(--surface);
@@ -587,3 +1023,52 @@ body {
 
 .log-entry.sent { color: var(--accent); }
 .log-entry.received { color: var(--green); }
+
+/* ==========================================================================
+   Responsive — mobile: slide-in sidebar + hamburger
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 149;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .nav-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    border-right: 1px solid var(--border);
+    height: 100dvh;
+  }
+
+  .nav-sidebar.visible {
+    transform: translateX(0);
+  }
+
+  .nav-close {
+    display: block;
+  }
+
+  .main-content {
+    padding: 72px 16px 24px;
+  }
+}

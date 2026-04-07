@@ -2,21 +2,23 @@
 Récupère et formate les prévisions météo depuis Open-Meteo.
 
 Open-Meteo est 100 % gratuit et ne nécessite aucune clé API.
+La ville est configurable via le fichier data/settings.json.
 """
 
+import json
 import urllib.request
 import urllib.parse
-import json
+from pathlib import Path
 from datetime import datetime
 
 from core.logger import get_logger
 
 log = get_logger(__name__)
 
-# Toulouse
-LATITUDE = 43.6047
-LONGITUDE = 1.4442
-CITY = "Toulouse"
+SETTINGS_PATH = Path(__file__).parent.parent.parent / "data" / "settings.json"
+
+# Valeurs par défaut
+_DEFAULT_CITY = {"name": "Toulouse", "latitude": 43.6047, "longitude": 1.4442}
 
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
@@ -55,6 +57,40 @@ WMO_CODES: dict[int, str] = {
 # Codes WMO considérés comme "averses / pluie"
 RAIN_CODES = {51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 95, 96, 99}
 
+
+# ── Settings ─────────────────────────────────────────────────────────
+
+def _load_settings() -> dict:
+    if SETTINGS_PATH.exists():
+        try:
+            return json.loads(SETTINGS_PATH.read_text("utf-8"))
+        except (json.JSONDecodeError, OSError):
+            pass
+    return {}
+
+
+def _save_settings(settings: dict) -> None:
+    SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    SETTINGS_PATH.write_text(json.dumps(settings, ensure_ascii=False, indent=2), "utf-8")
+
+
+def get_city() -> dict:
+    """Retourne la ville configurée {name, latitude, longitude}."""
+    settings = _load_settings()
+    return settings.get("city", {**_DEFAULT_CITY})
+
+
+def set_city(name: str, latitude: float, longitude: float) -> dict:
+    """Met à jour la ville et persiste le changement."""
+    settings = _load_settings()
+    city = {"name": name, "latitude": latitude, "longitude": longitude}
+    settings["city"] = city
+    _save_settings(settings)
+    log.info("Ville météo → %s (%.4f, %.4f)", name, latitude, longitude)
+    return city
+
+
+# ── Forecast ─────────────────────────────────────────────────────────
 
 def _fetch_json(url: str) -> dict:
     """GET synchrone simple (pas besoin de requests pour un seul appel)."""
@@ -103,9 +139,10 @@ def fetch_forecast() -> dict:
     Interroge Open-Meteo et retourne les données brutes du jour
     (code météo global, T min/max, codes horaires).
     """
+    city = get_city()
     params = urllib.parse.urlencode({
-        "latitude": LATITUDE,
-        "longitude": LONGITUDE,
+        "latitude": city["latitude"],
+        "longitude": city["longitude"],
         "daily": "weather_code,temperature_2m_max,temperature_2m_min",
         "hourly": "weather_code",
         "timezone": "Europe/Paris",
@@ -125,6 +162,9 @@ def get_forecast() -> dict:
       - rain_text : texte des averses (ou "")
       - overlay : texte court pour l'overlay hologramme
     """
+    city = get_city()
+    city_name = city["name"]
+
     data = fetch_forecast()
 
     daily = data["daily"]
@@ -142,12 +182,12 @@ def get_forecast() -> dict:
 
     # Texte TTS complet
     parts = [
-        f"Voici la météo du jour à {CITY}.",
+        f"Voici la météo du jour à {city_name}.",
         f"{description.capitalize()}, températures annoncées entre {t_min}° et {t_max}°.",
     ]
     if rain_text:
         parts.append(rain_text)
-    parts.append("Passez une bonne journée.")
+    parts.append("Passez une bonne journée, bisous !")
     text = " ".join(parts)
 
     # Texte court pour l'overlay hologramme
@@ -165,8 +205,3 @@ def get_forecast() -> dict:
         "rain_text": rain_text,
         "overlay": overlay,
     }
-
-
-def get_forecast_text() -> str:
-    """Raccourci : retourne uniquement le texte TTS."""
-    return get_forecast()["text"]

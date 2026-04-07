@@ -3,10 +3,11 @@ Handlers WebSocket pour le module Scheduler.
 
 Messages gérés :
   - routine.list     → {}
-  - routine.add      → { name, action, time, days }
+  - routine.add      → { name, action, time, days, config? }
   - routine.update   → { id, ...fields }
   - routine.delete   → { id }
   - routine.actions  → {}   (liste les actions disponibles)
+  - alarm.stop       → {}   (arrête le réveil en cours)
 """
 
 import asyncio
@@ -15,6 +16,7 @@ from core.logger import get_logger
 from core.ws_server import WebSocketServer
 from modules.scheduler.store import RoutineStore
 from modules.scheduler.runner import run_loop, register_action, _actions
+from modules.scheduler.actions import action_weather_tts, action_alarm, stop_alarm
 
 log = get_logger(__name__)
 
@@ -23,12 +25,10 @@ def register(server: WebSocketServer) -> None:
     """Enregistre les handlers scheduler et démarre la boucle."""
     store = RoutineStore()
 
-    # ── Enregistrer l'action weather.tts ─────────────────────────────
-    async def action_weather_tts():
-        from modules.weather.handler import _run_weather_tts
-        await _run_weather_tts(server)
+    # ── Actions ──────────────────────────────────────────────────────
 
-    register_action("weather.tts", action_weather_tts)
+    register_action("weather.tts", lambda config: action_weather_tts(server, config))
+    register_action("alarm", lambda config: action_alarm(server, config))
 
     # ── Handlers WebSocket ───────────────────────────────────────────
 
@@ -42,13 +42,14 @@ def register(server: WebSocketServer) -> None:
         action = payload.get("action", "")
         time = payload.get("time", "")
         days = payload.get("days", [])
+        config = payload.get("config", {})
 
         if not name or not action or not time or not days:
             return {"type": "routine.error", "payload": {"message": "Champs requis : name, action, time, days"}}
         if action not in _actions:
             return {"type": "routine.error", "payload": {"message": f"Action inconnue : {action}"}}
 
-        routine = store.add(name, action, time, days)
+        routine = store.add(name, action, time, days, config=config)
         return {"type": "routine.added", "payload": routine}
 
     @server.handle("routine.update")
@@ -73,6 +74,13 @@ def register(server: WebSocketServer) -> None:
     @server.handle("routine.actions")
     async def handle_actions(client_id: str, payload: dict) -> dict:
         return {"type": "routine.actions", "payload": {"actions": list(_actions.keys())}}
+
+    @server.handle("alarm.stop")
+    async def handle_alarm_stop(client_id: str, payload: dict) -> dict:
+        if stop_alarm():
+            log.info("alarm.stop reçu de %s", client_id)
+            return {"type": "alarm.stopped", "payload": {}}
+        return {"type": "alarm.error", "payload": {"message": "Aucun réveil en cours"}}
 
     # ── Démarrer la boucle en arrière-plan ───────────────────────────
     asyncio.get_event_loop().create_task(run_loop(store))
