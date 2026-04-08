@@ -113,6 +113,14 @@ function writeSettings(settings: Record<string, unknown>) {
   fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), "utf-8");
 }
 
+app.get("/api/settings", (_req, res) => {
+  const settings = readSettings();
+  res.json({
+    city: settings.city || { name: "Toulouse", latitude: 43.6047, longitude: 1.4442 },
+    store: settings.store || "carrefour",
+  });
+});
+
 app.get("/api/settings/city", (_req, res) => {
   const settings = readSettings();
   res.json(settings.city || { name: "Toulouse", latitude: 43.6047, longitude: 1.4442 });
@@ -128,6 +136,23 @@ app.post("/api/settings/city", (req, res) => {
   settings.city = { name, latitude: Number(latitude), longitude: Number(longitude) };
   writeSettings(settings);
   res.json(settings.city);
+});
+
+app.get("/api/settings/store", (_req, res) => {
+  const settings = readSettings();
+  res.json({ store: settings.store || "carrefour" });
+});
+
+app.post("/api/settings/store", (req, res) => {
+  const { store } = req.body;
+  if (!store) {
+    res.status(400).json({ error: "Champ 'store' requis" });
+    return;
+  }
+  const settings = readSettings();
+  settings.store = store;
+  writeSettings(settings);
+  res.json({ store });
 });
 
 // --- Music API (upload / list / delete) ---

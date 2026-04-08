@@ -25,6 +25,11 @@ interface GeoResult {
 
 const API_BASE = import.meta.env.DEV ? "http://localhost:3000" : "";
 
+const STORES: Record<string, string> = {
+  carrefour: "Carrefour",
+  intermarche: "Intermarché",
+};
+
 export function ConfigPage() {
   // ── Ville météo ─────────────────────────────────────────────────
   const [city, setCity] = useState<City | null>(null);
@@ -33,12 +38,29 @@ export function ConfigPage() {
   const [searching, setSearching] = useState(false);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
+  // ── Magasin préféré ─────────────────────────────────────────────
+  const [store, setStore] = useState("carrefour");
+
   useEffect(() => {
-    fetch(`${API_BASE}/api/settings/city`)
+    fetch(`${API_BASE}/api/settings`)
       .then((r) => r.json())
-      .then((c) => setCity(c))
+      .then((s) => {
+        setCity(s.city);
+        setStore(s.store || "carrefour");
+      })
       .catch(() => {});
   }, []);
+
+  const handleStoreChange = async (value: string) => {
+    setStore(value);
+    try {
+      await fetch(`${API_BASE}/api/settings/store`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store: value }),
+      });
+    } catch {}
+  };
 
   const handleCitySearch = (query: string) => {
     setCitySearch(query);
@@ -180,6 +202,24 @@ export function ConfigPage() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Magasin préféré */}
+      <div className="config-section">
+        <div className="config-section-header">
+          <h3>Magasin préféré</h3>
+        </div>
+        <div className="store-pick">
+          {Object.entries(STORES).map(([key, label]) => (
+            <button
+              key={key}
+              className={`category-btn ${store === key ? "active" : ""}`}
+              onClick={() => handleStoreChange(key)}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 

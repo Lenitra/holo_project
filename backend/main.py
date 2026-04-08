@@ -53,9 +53,11 @@ async def main() -> None:
     from modules.tts.handler import register as register_tts
     from modules.weather.handler import register as register_weather
     from modules.scheduler.handler import register as register_scheduler
+    from modules.shopping.handler import register as register_shopping
     register_tts(server)
     register_weather(server)
     register_scheduler(server)
+    register_shopping(server)
 
     await server.start()
 

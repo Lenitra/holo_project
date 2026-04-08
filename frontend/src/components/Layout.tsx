@@ -41,6 +41,10 @@ export function Layout({ connected, onLogout, unreadCount }: Props) {
             <span className="nav-icon">&#9783;</span>
             <span className="nav-label">Dashboard</span>
           </NavLink>
+          <NavLink to="/shopping" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
+            <span className="nav-icon">&#9733;</span>
+            <span className="nav-label">Courses</span>
+          </NavLink>
           <NavLink to="/config" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
             <span className="nav-icon">&#9881;</span>
             <span className="nav-label">Configuration</span>

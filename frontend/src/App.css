@@ -366,7 +366,9 @@ body {
    ========================================================================== */
 
 .dashboard-page,
-.debug-page {
+.debug-page,
+.shopping-page,
+.config-page {
   width: 100%;
 }
 
@@ -606,6 +608,123 @@ body {
 .city-result-detail {
   font-size: 0.75rem;
   color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Shopping list
+   ========================================================================== */
+
+.shopping-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.shopping-input {
+  flex: 1;
+}
+
+.shopping-add-btn {
+  width: 46px;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+  padding: 0;
+}
+
+.shopping-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shopping-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.shopping-item-done {
+  opacity: 0.5;
+}
+
+.shopping-item-done .shopping-text {
+  text-decoration: line-through;
+}
+
+.shopping-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.shopping-check:hover {
+  border-color: var(--accent);
+}
+
+.shopping-check.checked {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.shopping-check.checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.shopping-text {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.shopping-checked-section {
+  margin-top: 24px;
+}
+
+.shopping-checked-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.btn-store-link {
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.btn-store-link:hover {
+  color: var(--accent);
+}
+
+.store-pick {
+  display: flex;
+  gap: 8px;
 }
 
 .status-dot {

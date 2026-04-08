@@ -14,6 +14,7 @@ import { LoginScreen } from "./components/LoginScreen";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ConfigPage } from "./pages/ConfigPage";
+import { ShoppingPage } from "./pages/ShoppingPage";
 import { DebugPage } from "./pages/DebugPage";
 import "./App.css";
 
@@ -120,6 +121,7 @@ function App() {
       <Routes>
         <Route element={<Layout connected={connected} onLogout={logout} unreadCount={unreadCount} />}>
           <Route index element={<DashboardPage connected={connected} routines={routines} onSend={handleSend} />} />
+          <Route path="shopping" element={<ShoppingPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="config" element={<ConfigPage />} />
           <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} onSeen={handleMessagesSeen} />} />
         </Route>
