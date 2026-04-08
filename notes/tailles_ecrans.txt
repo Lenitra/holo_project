@@ -1,0 +1,4 @@
+Taille des écrans carrés :
+- 1 ecran : 194²
+- 2 ecrans : 172² 
+- 3 ecrans : 97²
