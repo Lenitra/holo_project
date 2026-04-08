@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hologramme</title>
+    <link rel="stylesheet" href="/hologram/1face.css">
+</head>
+<body>
+    <!-- Écran de démarrage pour débloquer l'autoplay audio -->
+    <div id="start-screen">
+        <button id="start-btn">Démarrer l'hologramme</button>
+    </div>
+
+    <!-- Face unique -->
+    <div class="pyramid" style="display:none">
+        <div class="face">
+            <div class="content">
+                <video class="avatar" muted loop playsinline></video>
+                <div class="overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/hologram/app.js"></script>
+</body>
+</html>

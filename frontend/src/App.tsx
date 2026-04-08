@@ -47,7 +47,6 @@ function App() {
   const [log, setLog] = useState<string[]>([]);
   const [clients, setClients] = useState<ClientInfo[]>([]);
   const [routines, setRoutines] = useState<Routine[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const lastProcessed = useRef<WSMessage | null>(null);
 
   // Demander le status et les routines à la connexion
@@ -84,7 +83,6 @@ function App() {
     }
 
     setLog((prev) => [...prev.slice(-49), `← ${lastMessage.type}: ${JSON.stringify(lastMessage.payload)}`]);
-    setUnreadCount((prev) => prev + 1);
   }, [lastMessage]);
 
   // Wrapper send qui ajoute au log
@@ -95,10 +93,6 @@ function App() {
       `→ ${msg.type} ${Object.keys(msg.payload).length ? JSON.stringify(msg.payload) : ""}`,
     ]);
   }, [send]);
-
-  const handleMessagesSeen = useCallback(() => {
-    setUnreadCount(0);
-  }, []);
 
   // Écran de chargement
   if (loading && !error) {
@@ -119,11 +113,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<Layout connected={connected} onLogout={logout} unreadCount={unreadCount} />}>
+        <Route element={<Layout connected={connected} onLogout={logout} />}>
           <Route index element={<DashboardPage connected={connected} routines={routines} onSend={handleSend} />} />
           <Route path="shopping" element={<ShoppingPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="config" element={<ConfigPage />} />
-          <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} onSeen={handleMessagesSeen} />} />
+          <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} />} />
         </Route>
       </Routes>
     </BrowserRouter>

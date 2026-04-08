@@ -215,6 +215,15 @@ app.delete("/api/music/:name", (req, res) => {
 
 // --- Fichiers statiques ---
 
+app.get("/hologram-1", (_req, res) => {
+  res.sendFile(path.join(__dirname, "hologram", "1face.html"));
+});
+app.get("/hologram-2", (_req, res) => {
+  res.sendFile(path.join(__dirname, "hologram", "2faces.html"));
+});
+app.get("/hologram-3", (_req, res) => {
+  res.sendFile(path.join(__dirname, "hologram", "3faces.html"));
+});
 app.use("/hologram", express.static(path.join(__dirname, "hologram")));
 app.use("/music", express.static(MUSIC_DIR));
 app.use(express.static(path.join(__dirname, "dist")));

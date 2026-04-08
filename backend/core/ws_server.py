@@ -35,6 +35,7 @@ class WebSocketServer:
     def __init__(self) -> None:
         self._clients: dict[str, "Client"] = {}
         self._handlers: dict[str, Handler] = {}
+        self._hologram_counter: int = 0
         self._remote_counter: int = 0
         self._handlers["identify"] = self._handle_identify
 
@@ -89,7 +90,8 @@ class WebSocketServer:
         self._clients.pop(client.id, None)
 
         if role == "hologram":
-            client.id = "hologram"
+            self._hologram_counter += 1
+            client.id = f"hologram_{self._hologram_counter}"
             client.role = "hologram"
         elif role == "remote":
             self._remote_counter += 1

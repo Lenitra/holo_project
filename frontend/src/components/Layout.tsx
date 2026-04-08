@@ -3,17 +3,15 @@
  */
 
 import { useState, useCallback } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 
 interface Props {
   connected: boolean;
   onLogout: () => void;
-  unreadCount: number;
 }
 
-export function Layout({ connected, onLogout, unreadCount }: Props) {
+export function Layout({ connected, onLogout }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const location = useLocation();
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -52,13 +50,14 @@ export function Layout({ connected, onLogout, unreadCount }: Props) {
           <NavLink to="/debug" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
             <span className="nav-icon">&#9998;</span>
             <span className="nav-label">Debug</span>
-            {unreadCount > 0 && location.pathname !== "/debug" && (
-              <span className="nav-badge">{unreadCount}</span>
-            )}
           </NavLink>
         </div>
         <div className="nav-footer">
-          <a href="/hologram" className="btn-hologram" target="_blank" rel="noopener">Hologramme</a>
+          <div className="nav-holo-links">
+            <a href="/hologram-1" className="btn-hologram" target="_blank" rel="noopener">1 face</a>
+            <a href="/hologram-2" className="btn-hologram" target="_blank" rel="noopener">2 faces</a>
+            <a href="/hologram-3" className="btn-hologram" target="_blank" rel="noopener">3 faces</a>
+          </div>
           <div className="nav-status-row">
             <span className={`status-dot ${connected ? "online" : "offline"}`} />
             <span className="nav-status">{connected ? "Connecté" : "Déconnecté"}</span>

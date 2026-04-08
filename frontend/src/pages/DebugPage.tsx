@@ -20,7 +20,6 @@ interface Props {
   clients: ClientInfo[];
   log: string[];
   onSend: (msg: WSMessage) => void;
-  onSeen: () => void;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -35,12 +34,7 @@ const ROLE_ICONS: Record<string, string> = {
   unknown: "○",
 };
 
-export function DebugPage({ connected, clients, log, onSend, onSeen }: Props) {
-  // Marquer les messages comme lus
-  useEffect(() => {
-    onSeen();
-  }, [log.length, onSeen]);
-
+export function DebugPage({ connected, clients, log, onSend }: Props) {
   // Auto-refresh status toutes les 5s
   useEffect(() => {
     if (!connected) return;
