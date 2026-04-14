@@ -2,8 +2,9 @@
  * Layout principal avec menu de navigation vertical + hamburger mobile.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import { getVisibleMenu, subscribeMenuChanges } from "../menuConfig";
 
 interface Props {
   connected: boolean;
@@ -12,6 +13,11 @@ interface Props {
 
 export function Layout({ connected, onLogout }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [items, setItems] = useState(getVisibleMenu);
+
+  useEffect(() => {
+    return subscribeMenuChanges(() => setItems(getVisibleMenu()));
+  }, []);
 
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
@@ -35,22 +41,18 @@ export function Layout({ connected, onLogout }: Props) {
           <button className="nav-close" onClick={closeMenu} aria-label="Fermer">&times;</button>
         </div>
         <div className="nav-links">
-          <NavLink to="/" end className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
-            <span className="nav-icon">&#9783;</span>
-            <span className="nav-label">Dashboard</span>
-          </NavLink>
-          <NavLink to="/shopping" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
-            <span className="nav-icon">&#9733;</span>
-            <span className="nav-label">Courses</span>
-          </NavLink>
-          <NavLink to="/config" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
-            <span className="nav-icon">&#9881;</span>
-            <span className="nav-label">Configuration</span>
-          </NavLink>
-          <NavLink to="/debug" className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`} onClick={closeMenu}>
-            <span className="nav-icon">&#9998;</span>
-            <span className="nav-label">Debug</span>
-          </NavLink>
+          {items.map((item) => (
+            <NavLink
+              key={item.id}
+              to={item.path}
+              end={item.path === "/"}
+              className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}
+              onClick={closeMenu}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </NavLink>
+          ))}
         </div>
         <div className="nav-footer">
           <div className="nav-holo-links">

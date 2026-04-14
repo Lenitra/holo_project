@@ -15,6 +15,7 @@ import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ConfigPage } from "./pages/ConfigPage";
 import { ShoppingPage } from "./pages/ShoppingPage";
+import { WorkoutPage } from "./pages/WorkoutPage";
 import { DebugPage } from "./pages/DebugPage";
 import "./App.css";
 
@@ -116,6 +117,7 @@ function App() {
         <Route element={<Layout connected={connected} onLogout={logout} />}>
           <Route index element={<DashboardPage connected={connected} routines={routines} onSend={handleSend} />} />
           <Route path="shopping" element={<ShoppingPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
+          <Route path="workout" element={<WorkoutPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="config" element={<ConfigPage />} />
           <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} />} />
         </Route>

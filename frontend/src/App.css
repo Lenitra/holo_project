@@ -361,6 +361,7 @@ body {
 .dashboard-page,
 .debug-page,
 .shopping-page,
+.workout-page,
 .config-page {
   width: 100%;
 }
@@ -718,6 +719,344 @@ body {
 .store-pick {
   display: flex;
   gap: 8px;
+}
+
+/* Menu latéral — config */
+.menu-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.menu-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: opacity 0.15s;
+}
+
+.menu-item-hidden {
+  opacity: 0.5;
+}
+
+.menu-item-reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.btn-reorder {
+  width: 22px;
+  height: 16px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 0.55rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s;
+}
+
+.btn-reorder:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-reorder:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.menu-item-icon {
+  font-size: 1.1rem;
+  width: 22px;
+  text-align: center;
+}
+
+.menu-item-label {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.menu-visibility-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.15s;
+}
+
+.menu-visibility-toggle.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.menu-visibility-toggle:hover {
+  background: rgba(124, 111, 247, 0.08);
+}
+
+/* ==========================================================================
+   Workout / WoD
+   ========================================================================== */
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  margin-bottom: 12px;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.btn-back:hover {
+  color: var(--accent);
+}
+
+.workout-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.workout-detail-header .page-title {
+  margin-bottom: 0;
+}
+
+.workout-description-card {
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+
+.workout-description-label {
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.workout-description {
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.workouts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workout-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.workout-card:hover {
+  border-color: var(--accent);
+}
+
+.workout-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.workout-card-last {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+
+.routine-cat-badge.cat-max_reps {
+  background: rgba(124, 111, 247, 0.15);
+  color: var(--accent);
+}
+
+.routine-cat-badge.cat-max_time {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--green);
+}
+
+.workout-session-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.workout-session-form h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.workout-history h3 {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.workout-session-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.workout-session-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.workout-session-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+}
+
+.workout-trend {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.trend-better { color: var(--green); }
+.trend-worse { color: var(--red); }
+.trend-same { color: var(--text-muted); }
+
+.workout-session-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.workout-session-notes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Confirm modal
+   ========================================================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.modal-title {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.modal-message {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-modal-cancel,
+.btn-modal-confirm {
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+
+.btn-modal-cancel {
+  background: none;
+  color: var(--text-muted);
+}
+
+.btn-modal-cancel:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.btn-modal-confirm {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn-modal-confirm:hover {
+  background: #e85a5a;
 }
 
 .status-dot {

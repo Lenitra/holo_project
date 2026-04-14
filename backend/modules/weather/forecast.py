@@ -6,6 +6,7 @@ La ville est configurable via le fichier data/settings.json.
 """
 
 import json
+from random import randint
 import urllib.request
 import urllib.parse
 from pathlib import Path
@@ -187,7 +188,17 @@ def get_forecast() -> dict:
     ]
     if rain_text:
         parts.append(rain_text)
-    parts.append("Passez une bonne journée, bisous !")
+    parts.append("Passez une bonne journée !")
+
+    rdm = randint(1, 100)
+
+    if rdm <= 5:
+        parts.append("Des bisous !")
+    elif rdm <= 10:
+        parts.append("Courage, vous allez gérer !")
+    elif rdm <= 15:
+        parts.append("Passez une excellente journée !")
+
     text = " ".join(parts)
 
     # Texte court pour l'overlay hologramme

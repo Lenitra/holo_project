@@ -3,6 +3,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { getAllMenuInOrder, isHidden, setHidden, moveItem, subscribeMenuChanges, type MenuItem } from "../menuConfig";
 
 interface MusicFile {
   name: string;
@@ -49,6 +50,13 @@ export function ConfigPage() {
         setStore(s.store || "carrefour");
       })
       .catch(() => {});
+  }, []);
+
+  // ── Menu latéral ────────────────────────────────────────────────
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(getAllMenuInOrder);
+
+  useEffect(() => {
+    return subscribeMenuChanges(() => setMenuItems(getAllMenuInOrder()));
   }, []);
 
   const handleStoreChange = async (value: string) => {
@@ -202,6 +210,49 @@ export function ConfigPage() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Menu latéral */}
+      <div className="config-section">
+        <div className="config-section-header">
+          <h3>Menu latéral</h3>
+        </div>
+        <p className="config-hint">Ordre et visibilité des pages dans le menu.</p>
+        <div className="menu-items-list">
+          {menuItems.map((item, idx) => {
+            const hidden = isHidden(item.id);
+            return (
+              <div key={item.id} className={`menu-item-row ${hidden ? "menu-item-hidden" : ""}`}>
+                <div className="menu-item-reorder">
+                  <button
+                    className="btn-reorder"
+                    onClick={() => moveItem(item.id, -1)}
+                    disabled={idx === 0}
+                    aria-label="Monter"
+                  >&#9650;</button>
+                  <button
+                    className="btn-reorder"
+                    onClick={() => moveItem(item.id, 1)}
+                    disabled={idx === menuItems.length - 1}
+                    aria-label="Descendre"
+                  >&#9660;</button>
+                </div>
+                <span className="menu-item-icon">{item.icon}</span>
+                <span className="menu-item-label">{item.label}</span>
+                {item.required ? (
+                  <span className="config-hint">Toujours visible</span>
+                ) : (
+                  <button
+                    className={`menu-visibility-toggle ${hidden ? "" : "active"}`}
+                    onClick={() => setHidden(item.id, !hidden)}
+                  >
+                    {hidden ? "Afficher" : "Masquer"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
