@@ -19,6 +19,36 @@ let currentScreen = "idle";
 let ws = null;
 let reconnectTimer = null;
 
+// --- Overlay noir (mode éteint) ---
+let blackOverlay = null;
+
+function showBlackOverlay(show) {
+  if (show) {
+    if (!blackOverlay) {
+      blackOverlay = document.createElement("div");
+      blackOverlay.id = "black-overlay";
+      Object.assign(blackOverlay.style, {
+        position: "fixed",
+        inset: "0",
+        background: "#000",
+        zIndex: "9999",
+        opacity: "0",
+        transition: "opacity 0.4s ease",
+      });
+      document.body.appendChild(blackOverlay);
+      // Force reflow pour que la transition s'applique
+      blackOverlay.offsetHeight;
+    }
+    blackOverlay.style.opacity = "1";
+  } else if (blackOverlay) {
+    blackOverlay.style.opacity = "0";
+    blackOverlay.addEventListener("transitionend", () => {
+      blackOverlay?.remove();
+      blackOverlay = null;
+    }, { once: true });
+  }
+}
+
 // --- Audio (réveil) ---
 let alarmAudio = null;
 
@@ -116,19 +146,17 @@ function changeScreen(screen, data) {
   console.log(`[holo] ${currentScreen} → ${screen}`);
   currentScreen = screen;
 
-  // Arrêter l'audio si on quitte un écran (changement quelconque)
-  stopMusic();
-
-  // Écran éteint : tout masquer
+  // Écran éteint : overlay noir par-dessus (tout continue en arrière-plan)
   if (screen === "off") {
-    videos.forEach((video) => {
-      video.pause();
-      video.classList.add("fade-out");
-      video.classList.remove("fade-in");
-    });
-    overlays.forEach((el) => { el.innerHTML = ""; });
+    showBlackOverlay(true);
     return;
   }
+
+  // Rallumage : retirer l'overlay noir
+  showBlackOverlay(false);
+
+  // Arrêter l'audio si on change d'écran
+  stopMusic();
 
   const clipSrc = `${CLIPS_PATH}/${screen}.mp4`;
 

@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { flushSync } from "react-dom";
 
 const WS_URL = import.meta.env.DEV
   ? "ws://localhost:3000/ws"
@@ -41,7 +42,10 @@ export function useWebSocket(token: string | null) {
           const msg: WSMessage = JSON.parse(event.data);
           if (msg.type === "authenticated") { setConnected(true); return; }
           if (msg.type === "error") { console.error("[ws] Erreur :", msg.payload); return; }
-          setLastMessage(msg);
+          // flushSync garantit que chaque message déclenche un render
+          // avant que le prochain onmessage ne soit traité,
+          // évitant ainsi la perte de messages par batching React.
+          flushSync(() => setLastMessage(msg));
         } catch {
           console.warn("[ws] Message non-JSON reçu :", event.data);
         }

@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 """
-Stockage des workouts et sessions.
+Stockage des exercices, séances et sessions.
 
-Workouts (templates) :
-  { "id": "hex8", "name": "Fran", "description": "...", "category": "max_reps" | "max_time" }
+Exercices :
+  { "id": "hex8", "title": "Pompes", "description": "..." }
+
+Séances (workouts) :
+  { "id": "hex8", "name": "Full Body", "description": "...",
+    "exercises": [
+      { "exercise_id": "hex8", "reps": 21, "duration": null, "description": "Avec poids" }
+    ] }
 
 Sessions (résultats) :
   { "id": "hex8", "workout_id": "hex8", "date": "2026-04-14T10:30:00",
-    "value": 42,    # nombre de reps (max_reps) ou secondes (max_time)
-    "notes": "..." }
+    "result": "21 reps — 15kg", "notes": "..." }
 """
 
 import json
@@ -23,6 +28,7 @@ from core.logger import get_logger
 log = get_logger(__name__)
 
 DATA_DIR = Path(__file__).parent.parent.parent / "data"
+EXERCISES_PATH = DATA_DIR / "exercises.json"
 WORKOUTS_PATH = DATA_DIR / "workouts.json"
 SESSIONS_PATH = DATA_DIR / "workout_sessions.json"
 
@@ -43,16 +49,60 @@ def _save(path: Path, data: list[dict[str, Any]]) -> None:
 
 
 class WorkoutStore:
-    """CRUD sur les workouts et sessions, persistés en JSON."""
-
-    VALID_CATEGORIES = {"max_reps", "max_time"}
+    """CRUD sur les exercices, séances et sessions, persistés en JSON."""
 
     def __init__(self) -> None:
+        self._exercises: list[dict[str, Any]] = _load(EXERCISES_PATH)
         self._workouts: list[dict[str, Any]] = _load(WORKOUTS_PATH)
         self._sessions: list[dict[str, Any]] = _load(SESSIONS_PATH)
-        log.info("Workouts : %d templates, %d sessions", len(self._workouts), len(self._sessions))
+        log.info(
+            "Workouts : %d exercices, %d séances, %d sessions",
+            len(self._exercises), len(self._workouts), len(self._sessions),
+        )
 
-    # ── Workouts ─────────────────────────────────────────────────────
+    # ── Exercices ────────────────────────────────────────────────────
+
+    def list_exercises(self) -> list[dict[str, Any]]:
+        return self._exercises
+
+    def get_exercise(self, exercise_id: str) -> dict[str, Any] | None:
+        return next((e for e in self._exercises if e["id"] == exercise_id), None)
+
+    def add_exercise(self, title: str, description: str) -> dict[str, Any]:
+        exercise = {
+            "id": uuid.uuid4().hex[:8],
+            "title": title,
+            "description": description,
+        }
+        self._exercises.append(exercise)
+        _save(EXERCISES_PATH, self._exercises)
+        return exercise
+
+    def update_exercise(self, exercise_id: str, **fields) -> dict[str, Any] | None:
+        exercise = self.get_exercise(exercise_id)
+        if exercise is None:
+            return None
+        for key in ("title", "description"):
+            if key in fields:
+                exercise[key] = fields[key]
+        _save(EXERCISES_PATH, self._exercises)
+        return exercise
+
+    def delete_exercise(self, exercise_id: str) -> bool:
+        before = len(self._exercises)
+        self._exercises = [e for e in self._exercises if e["id"] != exercise_id]
+        if len(self._exercises) == before:
+            return False
+        # Retirer cet exercice de toutes les séances qui l'utilisent
+        for w in self._workouts:
+            w["exercises"] = [
+                ex for ex in w.get("exercises", []) if ex["exercise_id"] != exercise_id
+            ]
+        _save(EXERCISES_PATH, self._exercises)
+        _save(WORKOUTS_PATH, self._workouts)
+        return True
+
+    # ── Séances (workouts) ───────────────────────────────────────────
 
     def list_workouts(self) -> list[dict[str, Any]]:
         return self._workouts
@@ -60,12 +110,17 @@ class WorkoutStore:
     def get_workout(self, workout_id: str) -> dict[str, Any] | None:
         return next((w for w in self._workouts if w["id"] == workout_id), None)
 
-    def add_workout(self, name: str, description: str, category: str) -> dict[str, Any]:
+    def add_workout(
+        self,
+        name: str,
+        description: str,
+        exercises: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         workout = {
             "id": uuid.uuid4().hex[:8],
             "name": name,
             "description": description,
-            "category": category,
+            "exercises": exercises,
         }
         self._workouts.append(workout)
         _save(WORKOUTS_PATH, self._workouts)
@@ -75,7 +130,7 @@ class WorkoutStore:
         workout = self.get_workout(workout_id)
         if workout is None:
             return None
-        for key in ("name", "description", "category"):
+        for key in ("name", "description", "exercises"):
             if key in fields:
                 workout[key] = fields[key]
         _save(WORKOUTS_PATH, self._workouts)
@@ -99,12 +154,12 @@ class WorkoutStore:
         sessions = [s for s in self._sessions if s["workout_id"] == workout_id]
         return sorted(sessions, key=lambda s: s["date"])
 
-    def add_session(self, workout_id: str, value: float, notes: str = "") -> dict[str, Any]:
+    def add_session(self, workout_id: str, result: str, notes: str = "") -> dict[str, Any]:
         session = {
             "id": uuid.uuid4().hex[:8],
             "workout_id": workout_id,
             "date": datetime.now().isoformat(timespec="seconds"),
-            "value": value,
+            "result": result,
             "notes": notes,
         }
         self._sessions.append(session)
