@@ -8,8 +8,14 @@ echo.
 
 set ROOT=%~dp0..
 
-:: 1. Build du frontend React
-echo [1/3] Build du frontend React...
+:: 1. Mise a jour du code (git pull)
+echo [1/4] Mise a jour du code (git pull)...
+cd /d "%ROOT%"
+git pull || echo       AVERTISSEMENT : git pull echoue, on continue avec le code local.
+echo.
+
+:: 2. Build du frontend React
+echo [2/4] Build du frontend React...
 cd /d "%ROOT%\frontend"
 call npm run build
 if %ERRORLEVEL% neq 0 (
@@ -20,8 +26,8 @@ if %ERRORLEVEL% neq 0 (
 echo       Build OK.
 echo.
 
-:: 2. Lancer le backend Python
-echo [2/3] Demarrage du backend Python...
+:: 3. Lancer le backend Python
+echo [3/4] Demarrage du backend Python...
 start "Backend Python" cmd /k "cd /d %ROOT%\backend && uv run python main.py"
 timeout /t 2 /nobreak >nul
 
@@ -31,8 +37,8 @@ timeout /t 5 /nobreak >nul
 echo.
 
 
-:: 3. Lancer le serveur Node (sert le build + proxy WS)
-echo [3/3] Demarrage du serveur Node...
+:: 4. Lancer le serveur Node (sert le build + proxy WS)
+echo [4/4] Demarrage du serveur Node...
 start "Frontend" cmd /k "cd /d %ROOT%\frontend && npx tsx server.ts"
 timeout /t 2 /nobreak >nul
 

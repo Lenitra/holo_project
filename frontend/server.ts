@@ -21,6 +21,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import multer from "multer";
 import fs from "fs";
+import { spawn } from "child_process";
 import { WebSocketServer, WebSocket } from "ws";
 import http from "http";
 
@@ -214,6 +215,58 @@ app.delete("/api/music/:name", (req, res) => {
   }
   fs.unlinkSync(filepath);
   res.json({ deleted: req.params.name });
+});
+
+// --- System API (mise à jour + redémarrage) ---
+
+const SCRIPTS_DIR = path.join(__dirname, "..", "scripts");
+
+function isAuthorized(req: express.Request): boolean {
+  const auth = req.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  if (!token) return false;
+  try { jwt.verify(token, JWT_SECRET); return true; }
+  catch { return false; }
+}
+
+// Met à jour le projet (git pull) et redémarre toute la stack.
+// L'action réelle est déléguée à un script de redémarrage lancé en mode
+// détaché, pour qu'il survive à l'arrêt de ce serveur Node.
+app.post("/api/system/update", (req, res) => {
+  if (!isAuthorized(req)) {
+    res.status(401).json({ error: "Non authentifié" });
+    return;
+  }
+
+  const isWin = process.platform === "win32";
+  const script = path.join(SCRIPTS_DIR, isWin ? "restart.bat" : "restart.bash");
+
+  if (!fs.existsSync(script)) {
+    console.error(`[system] Script de redémarrage introuvable : ${script}`);
+    res.status(500).json({ error: "Script de redémarrage introuvable" });
+    return;
+  }
+
+  console.log(`[system] Mise à jour + redémarrage demandés → ${script}`);
+
+  try {
+    // detached + unref : le processus survit à la mort du serveur Node,
+    // que le script de redémarrage va lui-même provoquer.
+    const child = isWin
+      ? spawn("cmd", ["/c", "start", "Holo Restart", "cmd", "/c", script], {
+          detached: true,
+          stdio: "ignore",
+          windowsHide: true,
+        })
+      : spawn("bash", [script], { detached: true, stdio: "ignore" });
+    child.unref();
+  } catch (err) {
+    console.error("[system] Échec du lancement du redémarrage :", err);
+    res.status(500).json({ error: "Impossible de lancer le redémarrage" });
+    return;
+  }
+
+  res.json({ ok: true, message: "Mise à jour lancée. Le système redémarre…" });
 });
 
 // --- Fichiers statiques ---

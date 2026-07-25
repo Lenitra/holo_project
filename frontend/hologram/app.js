@@ -247,6 +247,78 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// --- Orientation manuelle de l'affichage (page 1 face uniquement) -----------
+// Flèches gauche/droite : rotation par pas de 90°.
+// H : miroir horizontal · V : miroir vertical (utile car l'image est projetée).
+// Les préférences sont mémorisées dans le navigateur (localStorage).
+
+const singleFace = document.querySelectorAll(".face").length === 1;
+
+if (singleFace) {
+  const PREF_KEY = "holo_1face_display";
+  const rotateTarget = document.querySelector(".face .content");
+  const hint = document.getElementById("key-hint");
+
+  // État par défaut, puis restauration des préférences sauvegardées.
+  let state = { rotation: 0, flipH: false, flipV: false };
+  try {
+    const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "null");
+    if (saved && typeof saved === "object") {
+      state = {
+        rotation: ((Number(saved.rotation) % 360) + 360) % 360 || 0,
+        flipH: !!saved.flipH,
+        flipV: !!saved.flipV,
+      };
+    }
+  } catch {}
+
+  const applyTransform = () => {
+    if (!rotateTarget) return;
+    const sx = state.flipH ? -1 : 1;
+    const sy = state.flipV ? -1 : 1;
+    rotateTarget.style.transform = `rotate(${state.rotation}deg) scale(${sx}, ${sy})`;
+  };
+
+  const savePrefs = () => {
+    try {
+      localStorage.setItem(PREF_KEY, JSON.stringify(state));
+    } catch {}
+  };
+
+  // Encart d'aide : visible brièvement, puis s'estompe pour rester discret.
+  let hintTimer = null;
+  const showHint = () => {
+    if (!hint) return;
+    hint.classList.add("visible");
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hint.classList.remove("visible"), 4000);
+  };
+
+  document.addEventListener("keydown", (e) => {
+    let changed = true;
+    switch (e.code) {
+      case "ArrowRight": state.rotation = (state.rotation + 90) % 360; break;
+      case "ArrowLeft":  state.rotation = (state.rotation + 270) % 360; break;
+      case "KeyH":       state.flipH = !state.flipH; break;
+      case "KeyV":       state.flipV = !state.flipV; break;
+      default: changed = false;
+    }
+    if (!changed) return;
+    applyTransform();
+    savePrefs();
+    showHint();
+    console.log(`[holo] Affichage : rot ${state.rotation}° · miroir H ${state.flipH} · V ${state.flipV}`);
+  });
+
+  // Applique l'orientation restaurée dès le chargement.
+  applyTransform();
+
+  // Montre l'aide une fois l'écran de démarrage retiré.
+  document.getElementById("start-btn")?.addEventListener("click", () => {
+    setTimeout(showHint, 100);
+  });
+}
+
 // --- Démarrage (après interaction utilisateur pour débloquer l'audio) ---
 
 document.getElementById("start-btn").addEventListener("click", () => {

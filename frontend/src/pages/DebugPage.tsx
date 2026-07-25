@@ -3,7 +3,10 @@
  * Le status est actualisé automatiquement toutes les 5 secondes.
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ConfirmModal } from "../components/ConfirmModal";
+
+const API_BASE = import.meta.env.DEV ? "http://localhost:3000" : "";
 
 interface WSMessage {
   type: string;
@@ -20,6 +23,7 @@ interface Props {
   clients: ClientInfo[];
   log: string[];
   onSend: (msg: WSMessage) => void;
+  token: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -34,7 +38,11 @@ const ROLE_ICONS: Record<string, string> = {
   unknown: "○",
 };
 
-export function DebugPage({ connected, clients, log, onSend }: Props) {
+export function DebugPage({ connected, clients, log, onSend, token }: Props) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [updateMsg, setUpdateMsg] = useState<string | null>(null);
+
   // Auto-refresh status toutes les 5s
   useEffect(() => {
     if (!connected) return;
@@ -48,6 +56,28 @@ export function DebugPage({ connected, clients, log, onSend }: Props) {
     onSend({ type, payload });
   };
 
+  const handleUpdate = async () => {
+    setConfirmOpen(false);
+    setUpdating(true);
+    setUpdateMsg("Mise à jour et redémarrage en cours…");
+    try {
+      const res = await fetch(`${API_BASE}/api/system/update`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token ?? ""}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setUpdateMsg("Redémarrage lancé — reconnexion dans quelques instants…");
+      } else {
+        setUpdateMsg(data.error || "Échec de la mise à jour.");
+        setUpdating(false);
+      }
+    } catch {
+      // La coupure de connexion est attendue quand le serveur redémarre.
+      setUpdateMsg("Redémarrage en cours — reconnexion dans quelques instants…");
+    }
+  };
+
   return (
     <div className="debug-page">
       <h2 className="page-title">Debug</h2>
@@ -58,6 +88,29 @@ export function DebugPage({ connected, clients, log, onSend }: Props) {
         <button className="action-btn" onClick={() => handleSend("status")} disabled={!connected}>Status</button>
         <button className="action-btn" onClick={() => handleSend("display.restart")} disabled={!connected}>Restart Holo</button>
       </div>
+
+      {/* Système : mise à jour + redémarrage complet */}
+      <div className="remote-system">
+        <h3>Système</h3>
+        <button
+          className="action-btn action-btn-off"
+          onClick={() => setConfirmOpen(true)}
+          disabled={updating}
+        >
+          {updating ? "Redémarrage en cours…" : "Mettre à jour & Redémarrer"}
+        </button>
+        {updateMsg && <p className="system-msg">{updateMsg}</p>}
+      </div>
+
+      <ConfirmModal
+        open={confirmOpen}
+        title="Mettre à jour & Redémarrer"
+        message="Le projet va être mis à jour (git pull) puis toute la stack va redémarrer. L'hologramme et la télécommande seront indisponibles quelques instants."
+        confirmLabel="Mettre à jour"
+        cancelLabel="Annuler"
+        onConfirm={handleUpdate}
+        onCancel={() => setConfirmOpen(false)}
+      />
 
       {/* Appareils connectés */}
       <div className="remote-clients">

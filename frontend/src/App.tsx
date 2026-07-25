@@ -121,7 +121,7 @@ function App() {
           <Route path="workout" element={<WorkoutPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="planes" element={<PlanesPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="config" element={<ConfigPage />} />
-          <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} />} />
+          <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} token={token} />} />
         </Route>
       </Routes>
     </BrowserRouter>
