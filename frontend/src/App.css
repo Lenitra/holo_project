@@ -1933,6 +1933,284 @@ body {
 .log-entry.received { color: var(--green); }
 
 /* ==========================================================================
+   Page Avions
+   ========================================================================== */
+
+.planes-page {
+  width: 100%;
+  max-width: 560px;
+}
+
+.planes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planes-header .page-title {
+  margin: 0;
+}
+
+.planes-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.planes-btn {
+  min-width: 40px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.planes-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.planes-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.planes-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.planes-status {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+/* Radar */
+
+.planes-radar {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: 16px auto 8px;
+}
+
+.radar-disc {
+  fill: var(--surface);
+  stroke: var(--border);
+}
+
+.radar-ring {
+  fill: none;
+  stroke: var(--border);
+  stroke-dasharray: 3 4;
+}
+
+.radar-fov {
+  fill: rgba(124, 111, 247, 0.1);
+  stroke: rgba(124, 111, 247, 0.45);
+  stroke-width: 1;
+}
+
+.radar-cardinal {
+  fill: var(--text-muted);
+  font-size: 11px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.radar-cardinal.north {
+  fill: var(--accent);
+  font-weight: 600;
+}
+
+.radar-ring-label {
+  fill: var(--text-muted);
+  font-size: 9px;
+}
+
+.radar-plane path,
+.radar-plane circle {
+  fill: var(--accent);
+}
+
+.radar-plane.out path,
+.radar-plane.out circle {
+  fill: var(--text-muted);
+  opacity: 0.55;
+}
+
+.radar-plane-label {
+  fill: var(--text);
+  font-size: 9px;
+  text-anchor: middle;
+}
+
+.radar-plane.out .radar-plane-label {
+  fill: var(--text-muted);
+}
+
+.radar-plane-pulse {
+  fill: none;
+  stroke: var(--green);
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: radar-pulse 2s ease-out infinite;
+}
+
+@keyframes radar-pulse {
+  0% { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+.radar-observer {
+  fill: var(--green);
+}
+
+/* Configuration */
+
+.planes-config {
+  margin-top: 16px;
+}
+
+.planes-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.planes-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.planes-compass-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.planes-coords {
+  display: flex;
+  gap: 8px;
+}
+
+.planes-coords .routine-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.planes-config-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Liste */
+
+.planes-list {
+  margin-top: 20px;
+}
+
+.planes-list-header {
+  margin-bottom: 8px;
+}
+
+.planes-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+
+.planes-item-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.planes-route {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding-top: 6px;
+  border-top: 1px dashed var(--border);
+}
+
+.planes-item-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.planes-callsign {
+  font-weight: 600;
+  color: #fff;
+}
+
+.planes-detail {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.planes-item-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.planes-distance {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.planes-distance.close {
+  color: var(--green);
+}
+
+.planes-altitude-low {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.planes-item-out .planes-callsign,
+.planes-item-out .planes-distance {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.planes-list-hidden {
+  margin-top: 12px;
+}
+
+.planes-list-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 8px;
+}
+
+.planes-list-toggle:hover {
+  color: var(--text);
+}
+
+/* ==========================================================================
    Responsive — mobile: slide-in sidebar + hamburger
    ========================================================================== */
 

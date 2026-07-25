@@ -1,1 +1,22 @@
-[]
+[
+  {
+    "id": "864ee457",
+    "text": "Oeufs",
+    "checked": true
+  },
+  {
+    "id": "a6865465",
+    "text": "Beurre",
+    "checked": true
+  },
+  {
+    "id": "e75e4ec2",
+    "text": "Confiture",
+    "checked": true
+  },
+  {
+    "id": "2e9eb248",
+    "text": "Nutella",
+    "checked": true
+  }
+]

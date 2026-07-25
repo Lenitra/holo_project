@@ -1,1 +1,39 @@
-[]
+[
+  {
+    "id": "bdc2bd7c",
+    "name": "S1",
+    "description": "",
+    "exercises": [
+      {
+        "exercise_id": "d44967b2",
+        "reps": 20,
+        "duration": null,
+        "description": ""
+      },
+      {
+        "exercise_id": "1f37681e",
+        "reps": 20,
+        "duration": null,
+        "description": ""
+      },
+      {
+        "exercise_id": "d44967b2",
+        "reps": 20,
+        "duration": null,
+        "description": ""
+      },
+      {
+        "exercise_id": "e4e8ea07",
+        "reps": 50,
+        "duration": null,
+        "description": ""
+      },
+      {
+        "exercise_id": "88a82d0a",
+        "reps": null,
+        "duration": 1,
+        "description": ""
+      }
+    ]
+  }
+]

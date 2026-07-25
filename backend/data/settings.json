@@ -1,8 +1,15 @@
 {
   "city": {
-    "name": "Orly",
-    "latitude": 48.74792,
-    "longitude": 2.39253
+    "name": "Ramonville-Saint-Agne",
+    "latitude": 43.54618,
+    "longitude": 1.47491
   },
-  "store": "carrefour"
+  "store": "intermarche",
+  "planes": {
+    "latitude": 43.54703,
+    "longitude": 1.4755,
+    "azimuth": 235.0,
+    "fov": 150.0,
+    "radius_km": 30.0
+  }
 }

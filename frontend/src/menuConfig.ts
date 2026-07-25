@@ -17,6 +17,7 @@ export const DEFAULT_MENU: MenuItem[] = [
   { id: "dashboard", path: "/", label: "Dashboard", icon: "\u268F" },
   { id: "shopping", path: "/shopping", label: "Courses", icon: "\u262D" },
   { id: "workout", path: "/workout", label: "Sport", icon: "\u26AB" },
+  { id: "planes", path: "/planes", label: "Avions", icon: "\u2708" },
   { id: "config", path: "/config", label: "Configuration", icon: "\u2699", required: true },
   { id: "debug", path: "/debug", label: "Debug", icon: "\u270E" },
 ];

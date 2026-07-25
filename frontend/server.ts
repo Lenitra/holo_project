@@ -110,7 +110,10 @@ function readSettings(): Record<string, unknown> {
 function writeSettings(settings: Record<string, unknown>) {
   const dir = path.dirname(SETTINGS_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), "utf-8");
+  // Écriture atomique : le backend Python lit/écrit aussi ce fichier
+  const tmp = SETTINGS_PATH + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(settings, null, 2), "utf-8");
+  fs.renameSync(tmp, SETTINGS_PATH);
 }
 
 app.get("/api/settings", (_req, res) => {
