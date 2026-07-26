@@ -1,8 +1,13 @@
 /**
- * Page dashboard : actions principales et routines avec catégories.
+ * Page dashboard : actions principales, routines, et réglages des modules
+ * utilisés ici (ville météo, voix de l'assistant, musiques de réveil).
  */
 
 import { useState, useEffect } from "react";
+import { Fold } from "../components/Fold";
+import { CitySettings } from "../components/CitySettings";
+import { VoiceSettings } from "../components/VoiceSettings";
+import { MusicLibrary } from "../components/MusicLibrary";
 
 interface WSMessage {
   type: string;
@@ -27,6 +32,7 @@ interface MusicFile {
 interface Props {
   connected: boolean;
   routines: Routine[];
+  lastMessage: WSMessage | null;
   onSend: (msg: WSMessage) => void;
 }
 
@@ -39,7 +45,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const API_BASE = import.meta.env.DEV ? "http://localhost:3000" : "";
 
-export function DashboardPage({ connected, routines, onSend }: Props) {
+export function DashboardPage({ connected, routines, lastMessage, onSend }: Props) {
   const [displayOff, setDisplayOff] = useState(false);
   // null = fermé, undefined = création, string = id de la routine éditée
   const [editingId, setEditingId] = useState<string | null | undefined>(null);
@@ -211,7 +217,7 @@ export function DashboardPage({ connected, routines, onSend }: Props) {
               <div className="alarm-config">
                 <label className="config-label">Musique</label>
                 {musicFiles.length === 0 ? (
-                  <p className="config-hint">Aucun MP3 — ajoutez-en dans Configuration</p>
+                  <p className="config-hint">Aucun MP3 — ajoutez-en dans « Musiques réveil » plus bas</p>
                 ) : (
                   <select
                     className="routine-input"
@@ -286,6 +292,17 @@ export function DashboardPage({ connected, routines, onSend }: Props) {
           ))}
         </div>
       </div>
+
+      {/* Réglages des modules utilisés sur cette page */}
+      <Fold title="Ville météo">
+        <CitySettings />
+      </Fold>
+      <Fold title="Voix de l'assistant">
+        <VoiceSettings connected={connected} lastMessage={lastMessage} onSend={onSend} />
+      </Fold>
+      <Fold title="Musiques réveil">
+        <MusicLibrary />
+      </Fold>
     </div>
   );
 }

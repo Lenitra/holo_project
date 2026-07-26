@@ -88,6 +88,17 @@ export function ShoppingPage({ connected, lastMessage, onSend }: Props) {
     setNewText("");
   };
 
+  const handleStoreChange = async (value: string) => {
+    setStore(value);
+    try {
+      await fetch(`${API_BASE}/api/settings/store`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store: value }),
+      });
+    } catch {}
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleAdd();
   };
@@ -160,6 +171,25 @@ export function ShoppingPage({ connected, lastMessage, onSend }: Props) {
           </div>
         </div>
       )}
+
+      {/* Magasin utilisé par la loupe de recherche drive */}
+      <div className="config-section">
+        <div className="config-section-header">
+          <h3>Magasin drive</h3>
+        </div>
+        <p className="config-hint">La loupe de chaque article cherche sur ce site.</p>
+        <div className="store-pick">
+          {Object.entries(STORE_LABELS).map(([key, label]) => (
+            <button
+              key={key}
+              className={`category-btn ${store === key ? "active" : ""}`}
+              onClick={() => handleStoreChange(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

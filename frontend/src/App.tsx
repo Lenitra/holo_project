@@ -13,10 +13,10 @@ import { useWebSocket } from "./hooks/useWebSocket";
 import { LoginScreen } from "./components/LoginScreen";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
-import { ConfigPage } from "./pages/ConfigPage";
 import { ShoppingPage } from "./pages/ShoppingPage";
 import { WorkoutPage } from "./pages/WorkoutPage";
 import { PlanesPage } from "./pages/PlanesPage";
+import { SpotifyPage } from "./pages/SpotifyPage";
 import { DebugPage } from "./pages/DebugPage";
 import "./App.css";
 
@@ -116,11 +116,11 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<Layout connected={connected} onLogout={logout} />}>
-          <Route index element={<DashboardPage connected={connected} routines={routines} onSend={handleSend} />} />
+          <Route index element={<DashboardPage connected={connected} routines={routines} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="shopping" element={<ShoppingPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="workout" element={<WorkoutPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="planes" element={<PlanesPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
-          <Route path="config" element={<ConfigPage />} />
+          <Route path="spotify" element={<SpotifyPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="debug" element={<DebugPage connected={connected} clients={clients} log={log} onSend={handleSend} token={token} />} />
         </Route>
       </Routes>

@@ -1,8 +1,8 @@
 /**
  * Configuration du menu latéral : ordre et visibilité des liens.
  *
- * Persisté en localStorage. La Configuration est toujours visible
- * pour qu'on puisse toujours y accéder.
+ * Persisté en localStorage. L'édition se fait directement dans la sidebar
+ * (crayon en haut du menu), qui reste accessible quoi qu'on masque.
  */
 
 export interface MenuItem {
@@ -18,7 +18,7 @@ export const DEFAULT_MENU: MenuItem[] = [
   { id: "shopping", path: "/shopping", label: "Courses", icon: "\u262D" },
   { id: "workout", path: "/workout", label: "Sport", icon: "\u26AB" },
   { id: "planes", path: "/planes", label: "Avions", icon: "\u2708" },
-  { id: "config", path: "/config", label: "Configuration", icon: "\u2699", required: true },
+  { id: "spotify", path: "/spotify", label: "Spotify", icon: "\u266b" },
   { id: "debug", path: "/debug", label: "Debug", icon: "\u270E" },
 ];
 

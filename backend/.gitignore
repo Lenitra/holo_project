@@ -6,3 +6,7 @@ uv.lock
 logs/
 *.db
 .env
+
+# Modèles et échantillons TTS (téléchargés à la demande)
+data/tts/
+data/spotify.json

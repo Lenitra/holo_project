@@ -56,12 +56,19 @@ async def main() -> None:
     from modules.shopping.handler import register as register_shopping
     from modules.workout.handler import register as register_workout
     from modules.planes.handler import register as register_planes
+    from modules.spotify.handler import register as register_spotify
     register_tts(server)
     register_weather(server)
     register_scheduler(server)
     register_shopping(server)
     register_workout(server)
     register_planes(server)
+    register_spotify(server)
+
+    # Prépare la voix en tâche de fond (téléchargement éventuel du modèle
+    # + chargement en mémoire) pour que la première phrase soit immédiate.
+    from modules.tts.engine import warmup as warmup_tts
+    asyncio.create_task(warmup_tts())
 
     await server.start()
 

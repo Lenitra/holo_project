@@ -269,6 +269,81 @@ app.post("/api/system/update", (req, res) => {
   res.json({ ok: true, message: "Mise à jour lancée. Le système redémarre…" });
 });
 
+// --- Spotify OAuth (callback) ---
+
+/**
+ * Envoie un message au backend Python et attend sa réponse.
+ *
+ * Le backend ne parle que WebSocket : pour les échanges ponctuels initiés par
+ * une requête HTTP (ici la redirection OAuth de Spotify), on ouvre une
+ * connexion éphémère.
+ */
+function backendRequest(
+  type: string,
+  payload: Record<string, unknown>,
+  timeoutMs = 20000
+): Promise<{ type: string; payload: Record<string, unknown> }> {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(BACKEND_WS_URL);
+    const timer = setTimeout(() => { ws.close(); reject(new Error("Backend muet")); }, timeoutMs);
+
+    const finish = (fn: () => void) => { clearTimeout(timer); ws.close(); fn(); };
+
+    ws.on("open", () => ws.send(JSON.stringify({ type, payload })));
+    ws.on("message", (data) => {
+      try {
+        finish(() => resolve(JSON.parse(data.toString())));
+      } catch {
+        finish(() => reject(new Error("Réponse illisible du backend")));
+      }
+    });
+    ws.on("error", (err) => finish(() => reject(err)));
+  });
+}
+
+/** Page de fin d'autorisation affichée dans le navigateur de l'utilisateur. */
+function oauthPage(title: string, message: string, ok: boolean): string {
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Spotify — ${title}</title>
+<style>
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+         background:#111; color:#eee; font-family:system-ui,sans-serif; text-align:center; padding:24px; }
+  .card { max-width:380px; }
+  h1 { font-size:1.3rem; margin:0 0 12px; color:${ok ? "#1db954" : "#ff5c5c"}; }
+  p { color:#aaa; line-height:1.5; margin:0; }
+</style></head><body><div class="card"><h1>${title}</h1><p>${message}</p></div></body></html>`;
+}
+
+app.get("/api/spotify/callback", async (req, res) => {
+  const { code, state, error } = req.query as Record<string, string | undefined>;
+
+  if (error) {
+    console.warn(`[spotify] Autorisation refusée : ${error}`);
+    res.status(400).send(oauthPage("Autorisation refusée", `Spotify a répondu : ${error}`, false));
+    return;
+  }
+  if (!code || !state) {
+    res.status(400).send(oauthPage("Requête invalide", "Code d'autorisation manquant.", false));
+    return;
+  }
+
+  try {
+    const reply = await backendRequest("spotify.callback", { code, state });
+    if (reply.type === "spotify.error") {
+      const message = String(reply.payload?.message || "Erreur inconnue");
+      console.error(`[spotify] Connexion échouée : ${message}`);
+      res.status(400).send(oauthPage("Connexion échouée", message, false));
+      return;
+    }
+    console.log("[spotify] Compte connecté");
+    res.send(oauthPage("Compte connecté", "Tu peux fermer cet onglet et revenir à la télécommande.", true));
+  } catch (err) {
+    console.error("[spotify] Backend injoignable :", err);
+    res.status(502).send(oauthPage("Backend injoignable", "Le backend n'a pas répondu. Réessaie.", false));
+  }
+});
+
 // --- Fichiers statiques ---
 
 app.get("/hologram-1", (_req, res) => {

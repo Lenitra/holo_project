@@ -2230,6 +2230,319 @@ body {
 }
 
 /* ==========================================================================
+   Voix de l'assistant (Configuration)
+   ========================================================================== */
+
+.voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.voice-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.voice-card.active {
+  border-color: var(--accent);
+}
+
+.voice-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.voice-pick:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.voice-label {
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.voice-card.active .voice-label {
+  color: var(--accent);
+}
+
+.voice-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-voice-preview {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.btn-voice-preview:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.btn-voice-preview:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.voice-speakers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.voice-sliders {
+  margin-top: 16px;
+}
+
+/* ==========================================================================
+   Sections repliables + réglages intégrés aux pages
+   ========================================================================== */
+
+.fold-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.fold-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.fold-chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  transform: rotate(-90deg);
+}
+
+.fold-chevron.open {
+  transform: rotate(0deg);
+}
+
+.fold-body {
+  margin-top: 12px;
+}
+
+.voice-test-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.voice-test-row .config-hint {
+  flex: 1;
+}
+
+.music-lib-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+/* Édition du menu dans la sidebar */
+
+/* Le brand pousse le crayon et la croix à droite */
+.nav-brand-row {
+  gap: 8px;
+}
+
+.nav-brand-row .nav-brand {
+  flex: 1;
+}
+
+.nav-edit-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+
+.nav-edit-btn:hover,
+.nav-edit-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.nav-links-editing {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 10px;
+}
+
+.nav-links-editing .menu-item-row {
+  padding: 6px 8px;
+  gap: 8px;
+}
+
+.nav-edit-done {
+  margin-top: 8px;
+}
+
+/* ==========================================================================
+   Spotify
+   ========================================================================== */
+
+.spotify-notice {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: rgba(29, 185, 84, 0.12);
+  border: 1px solid rgba(29, 185, 84, 0.4);
+  color: #1db954;
+  font-size: 0.85rem;
+}
+
+.spotify-search {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.spotify-search .routine-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.spotify-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.spotify-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.spotify-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.spotify-cover {
+  width: 44px;
+  height: 44px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.spotify-track-name {
+  font-size: 0.9rem;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotify-track-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spotify-now {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  min-height: 44px;
+}
+
+.spotify-now-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.spotify-transport,
+.spotify-devices,
+.spotify-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.spotify-device-type {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.spotify-create {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.spotify-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
    Responsive — mobile: slide-in sidebar + hamburger
    ========================================================================== */
 

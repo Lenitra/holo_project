@@ -11,5 +11,12 @@
     "azimuth": 235.0,
     "fov": 150.0,
     "radius_km": 30.0
+  },
+  "tts": {
+    "engine": "auto",
+    "voice": "fr_FR-siwis-medium",
+    "speaker": 0,
+    "rate": 200,
+    "volume": 1.0
   }
 }

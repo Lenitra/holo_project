@@ -88,6 +88,7 @@ Backend envoie "display.update" ───► App web hologramme
 | **asyncio**      | Orchestration async — scheduler, modules, WS |
 | **websockets**   | Serveur WebSocket central (port 8765)        |
 | **APScheduler**  | Planification des réveils et routines        |
+| **Piper**        | Synthèse vocale française neuronale, locale  |
 | **SQLite**       | Persistance locale (configs, historique)     |
 | **bleak**        | Gestion async du Bluetooth (enceintes)       |
 | **GPIO / evdev** | Lecture du bouton physique                   |
@@ -151,6 +152,8 @@ Chaque client s'identifie à la connexion (`hologram` ou `remote`) pour que le b
 
 ### V1
 
+- **Voix (TTS)** — Synthèse vocale française 100 % locale, voix au choix (cf. ci-dessous)
+- **Spotify** — Recherche de playlists, file d'attente, création de playlists (cf. ci-dessous)
 - **Réveil / Scheduler** — Alarmes et routines planifiées, configurable via télécommande, stoppable via bouton physique
 - **Audio / Bluetooth** — Lecture audio native, routage vers enceintes BT via bleak
 - **Hologramme** — App web pyramide 4 faces, clips vidéo + overlay, piloté par le backend
@@ -158,10 +161,97 @@ Chaque client s'identifie à la connexion (`hologram` ou `remote`) pour que le b
 
 ### Futur
 
-- **Spotify** — Contrôle via API Spotify Connect
 - **Caméra** — Surveillance vidéo via OpenCV, détection de mouvement
 - **Domotique** — Appareils connectés (MQTT sera ajouté à ce moment-là)
 - **Commande vocale** — Whisper : voix → texte → intent → action
+
+---
+
+## Voix (TTS)
+
+La synthèse vocale tourne **entièrement en local**, en français, via
+[Piper](https://github.com/OHF-voice/piper1-gpl) : réseau de neurones ONNX
+exécuté sur CPU (temps réel même sur Raspberry Pi). Aucun appel réseau à la
+synthèse — seul le téléchargement initial du modèle nécessite une connexion.
+
+- Modèles stockés dans `backend/data/tts/voices/` (non versionnés, ~61 Mo par voix)
+- Téléchargés automatiquement au premier démarrage, puis chargés en mémoire
+- Voix, débit et volume réglables depuis **Dashboard → Voix de l'assistant**
+  de la télécommande, avec bouton d'écoute pour comparer avant de choisir
+- Réglages persistés dans `backend/data/settings.json`, clé `tts`
+- Repli automatique sur le moteur du système (SAPI5 / espeak-ng) si Piper est
+  indisponible, avec sélection explicite d'une voix française
+
+### Voix françaises disponibles
+
+| Voix                 | Description                        |
+| -------------------- | ---------------------------------- |
+| `fr_FR-siwis-medium` | Femme, naturelle — **par défaut**  |
+| `fr_FR-tom-medium`   | Homme, posée                       |
+| `fr_FR-upmc-medium`  | Jessica (femme) / Pierre (homme)   |
+| `fr_FR-mls-medium`   | 125 locuteurs, qualité variable    |
+| `*-low`              | Versions légères, moins naturelles |
+
+### Outils en ligne de commande
+
+```bash
+cd backend
+uv run python -m modules.tts.cli --list                      # catalogue + état
+uv run python -m modules.tts.cli --download fr_FR-tom-medium # pré-télécharger
+uv run python -m modules.tts.cli --samples                   # 1 WAV par voix pour comparer
+uv run python -m modules.tts.cli --say "Bonjour !"           # test direct
+```
+
+**Dépendance système (Linux)** : la lecture audio utilise `paplay`
+(PulseAudio/PipeWire) ou `aplay` (`alsa-utils`). Sous Windows, `winsound` suffit.
+
+---
+
+## Spotify
+
+Module basé sur l'**API Web Spotify** (flux OAuth « Authorization Code »).
+Depuis la page **Spotify** de la télécommande : rechercher une playlist,
+consulter ses titres, les mettre en file d'attente et créer / remplir ses
+propres playlists.
+
+### Mise en route
+
+1. Créer une application sur [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard)
+2. Y déclarer l'URL de redirection **exactement** telle qu'elle sera utilisée :
+   `https://prism.taumah.fr/api/spotify/callback`
+3. Sur la page **Spotify**, saisir Client ID, Client Secret et Redirect URI
+   (section « Identifiants de l'application »)
+4. Sur la page **Spotify**, cliquer sur *Connecter mon compte* : Spotify redirige
+   vers le serveur Node, qui transmet le code au backend. Le refresh token est
+   ensuite conservé — l'opération n'est à faire qu'une fois.
+
+Identifiants et jetons sont stockés dans `backend/data/spotify.json`
+(hors dépôt Git, permissions `600`). Le Client Secret n'est jamais renvoyé à la
+télécommande, seul un indicateur « renseigné » l'est.
+
+### Limites côté Spotify
+
+- Piloter la lecture (file d'attente, play/pause, appareils) exige un compte
+  **Premium** et un appareil Spotify Connect actif
+- La mise en file est plafonnée à **50 titres** par action (un appel API par titre)
+- Une app en mode développement n'accepte que les comptes ajoutés manuellement
+  dans le dashboard
+
+### Messages WebSocket
+
+| Message                  | Rôle                                        |
+| ------------------------ | ------------------------------------------- |
+| `spotify.status`         | État : configuré, connecté, compte, appareil |
+| `spotify.set_credentials`| Enregistre Client ID / Secret / Redirect URI |
+| `spotify.auth_url`       | URL d'autorisation à ouvrir                  |
+| `spotify.search`         | Recherche `playlist` ou `track`              |
+| `spotify.playlist`       | Détail d'une playlist + ses titres           |
+| `spotify.playlists`      | Mes playlists                                |
+| `spotify.playlist_create`| Crée une playlist                            |
+| `spotify.playlist_add`   | Ajoute des titres à une playlist             |
+| `spotify.queue`          | Met un ou plusieurs titres en file d'attente |
+| `spotify.devices` / `set_device` | Appareils Spotify Connect            |
+| `spotify.play` / `pause` / `next` | Transport                           |
 
 ---
 
