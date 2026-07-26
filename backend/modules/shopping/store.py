@@ -75,3 +75,35 @@ class ShoppingStore:
         if removed > 0:
             self._save()
         return removed
+
+    def merge(self, texts: list[str]) -> dict[str, int]:
+        """
+        Verse une liste d'articles dans la liste de courses, sans doublons
+        (comparaison insensible à la casse) :
+          - absent               → ajouté
+          - présent déjà coché   → re-décoché (à racheter)
+          - présent non coché    → ignoré
+        Retourne les compteurs { added, restored, skipped }.
+        """
+        by_text = {i["text"].strip().casefold(): i for i in self._items}
+        added = restored = skipped = 0
+
+        for raw in texts:
+            text = str(raw).strip()
+            if not text:
+                continue
+            existing = by_text.get(text.casefold())
+            if existing is None:
+                item = {"id": uuid.uuid4().hex[:8], "text": text, "checked": False}
+                self._items.append(item)
+                by_text[text.casefold()] = item
+                added += 1
+            elif existing["checked"]:
+                existing["checked"] = False
+                restored += 1
+            else:
+                skipped += 1
+
+        if added or restored:
+            self._save()
+        return {"added": added, "restored": restored, "skipped": skipped}
