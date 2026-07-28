@@ -54,6 +54,7 @@ async def main() -> None:
     from modules.weather.handler import register as register_weather
     from modules.scheduler.handler import register as register_scheduler
     from modules.shopping.handler import register as register_shopping
+    from modules.todo.handler import register as register_todo
     from modules.workout.handler import register as register_workout
     from modules.planes.handler import register as register_planes
     from modules.spotify.handler import register as register_spotify
@@ -61,6 +62,7 @@ async def main() -> None:
     register_weather(server)
     register_scheduler(server)
     register_shopping(server)
+    register_todo(server)
     register_workout(server)
     register_planes(server)
     register_spotify(server)

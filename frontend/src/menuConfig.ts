@@ -16,6 +16,7 @@ export interface MenuItem {
 export const DEFAULT_MENU: MenuItem[] = [
   { id: "dashboard", path: "/", label: "Dashboard", icon: "\u268F" },
   { id: "shopping", path: "/shopping", label: "Courses", icon: "\u262D" },
+  { id: "todo", path: "/todo", label: "Todo", icon: "\u2611" },
   { id: "workout", path: "/workout", label: "Sport", icon: "\u26AB" },
   { id: "planes", path: "/planes", label: "Avions", icon: "\u2708" },
   { id: "spotify", path: "/spotify", label: "Spotify", icon: "\u266b" },

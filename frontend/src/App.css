@@ -361,6 +361,7 @@ body {
 .dashboard-page,
 .debug-page,
 .shopping-page,
+.todo-page,
 .workout-page,
 .config-page {
   width: 100%;
@@ -605,7 +606,7 @@ body {
 }
 
 /* ==========================================================================
-   Shopping list
+   Shopping list — les lignes cochables sont partagées avec les tâches (todo)
    ========================================================================== */
 
 .shopping-add {
@@ -631,7 +632,8 @@ body {
   gap: 6px;
 }
 
-.shopping-item {
+.shopping-item,
+.todo-item {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -641,15 +643,18 @@ body {
   border-radius: var(--radius);
 }
 
-.shopping-item-done {
+.shopping-item-done,
+.todo-item-done {
   opacity: 0.5;
 }
 
-.shopping-item-done .shopping-text {
+.shopping-item-done .shopping-text,
+.todo-item-done .todo-text {
   text-decoration: line-through;
 }
 
-.shopping-check {
+.shopping-check,
+.todo-check {
   width: 22px;
   height: 22px;
   border-radius: 6px;
@@ -661,16 +666,19 @@ body {
   position: relative;
 }
 
-.shopping-check:hover {
+.shopping-check:hover,
+.todo-check:hover {
   border-color: var(--accent);
 }
 
-.shopping-check.checked {
+.shopping-check.checked,
+.todo-check.checked {
   background: var(--green);
   border-color: var(--green);
 }
 
-.shopping-check.checked::after {
+.shopping-check.checked::after,
+.todo-check.checked::after {
   content: "✓";
   position: absolute;
   inset: 0;
@@ -682,7 +690,8 @@ body {
   font-weight: 700;
 }
 
-.shopping-text {
+.shopping-text,
+.todo-text {
   flex: 1;
   font-size: 0.95rem;
   color: #fff;
@@ -806,6 +815,25 @@ body {
 
 .menu-visibility-toggle:hover {
   background: rgba(124, 111, 247, 0.08);
+}
+
+/* ==========================================================================
+   Todo — listes de tâches
+   ========================================================================== */
+
+.todo-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+/* Édition d'une tâche : l'input remplace le texte sans déformer la ligne */
+.todo-edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 0.95rem;
 }
 
 /* ==========================================================================

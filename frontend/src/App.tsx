@@ -14,6 +14,7 @@ import { LoginScreen } from "./components/LoginScreen";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ShoppingPage } from "./pages/ShoppingPage";
+import { TodoPage } from "./pages/TodoPage";
 import { WorkoutPage } from "./pages/WorkoutPage";
 import { PlanesPage } from "./pages/PlanesPage";
 import { SpotifyPage } from "./pages/SpotifyPage";
@@ -118,6 +119,7 @@ function App() {
         <Route element={<Layout connected={connected} onLogout={logout} />}>
           <Route index element={<DashboardPage connected={connected} routines={routines} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="shopping" element={<ShoppingPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
+          <Route path="todo" element={<TodoPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="workout" element={<WorkoutPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="planes" element={<PlanesPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
           <Route path="spotify" element={<SpotifyPage connected={connected} lastMessage={lastMessage} onSend={handleSend} />} />
