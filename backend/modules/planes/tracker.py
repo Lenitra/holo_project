@@ -26,9 +26,11 @@ SETTINGS_PATH = Path(__file__).parent.parent.parent / "data" / "settings.json"
 
 ADSB_URL = "https://api.adsb.lol/v2/point/{lat}/{lon}/{radius_nm}"
 ROUTE_URL = "https://api.adsbdb.com/v0/callsign/{callsign}"
-ROUTE_LOOKUP_MAX = 30      # nb max de résolutions de route par rafraîchissement
-_ROUTE_CACHE_MAX = 1000
-_route_cache: dict[str, dict | None] = {}  # callsign → {origin, destination} | None (inconnu)
+AIRCRAFT_URL = "https://api.adsbdb.com/v0/aircraft/{ident}"
+ROUTE_LOOKUP_MAX = 30      # nb max de résolutions (route / appareil) par rafraîchissement
+_LOOKUP_CACHE_MAX = 1000
+_route_cache: dict[str, dict | None] = {}  # callsign → {origin, destination, airline} | None (inconnu)
+_aircraft_cache: dict[str, dict | None] = {}  # hex → {manufacturer, model, owner} | None (inconnu)
 
 NM_TO_KM = 1.852
 FT_TO_M = 0.3048
@@ -179,7 +181,14 @@ def _to_number(value) -> float | None:
     return float(value) if isinstance(value, (int, float)) else None
 
 
-# ── Routes de vol (aéroports de départ / destination) ───────────────
+# ── Routes de vol (aéroports de départ / destination, compagnie) ────
+
+def _titleize(value: str | None) -> str | None:
+    """Adoucit les noms tout en majuscules renvoyés par adsbdb ("AIRBUS")."""
+    if not value:
+        return None
+    return value.title() if value.isupper() else value
+
 
 def _airport_place(airport) -> dict | None:
     """Ville + pays d'un aéroport adsbdb (le front traduit le pays via l'ISO)."""
@@ -196,8 +205,8 @@ def _airport_place(airport) -> dict | None:
 def _fetch_route(callsign: str) -> dict | None:
     """
     Interroge adsbdb pour un indicatif.
-    Retourne {origin, destination} ou None si la route est inconnue
-    (vols privés / indicatifs non commerciaux — réponse 404 ou
+    Retourne {origin, destination, airline} ou None si l'indicatif est
+    inconnu (vols privés / indicatifs non commerciaux — réponse 404 ou
     "unknown callsign" selon les cas).
     """
     try:
@@ -212,36 +221,62 @@ def _fetch_route(callsign: str) -> dict | None:
     flightroute = resp.get("flightroute") or {}
     origin = _airport_place(flightroute.get("origin"))
     destination = _airport_place(flightroute.get("destination"))
-    if origin is None and destination is None:
+    airline_data = flightroute.get("airline")
+    airline = _titleize((airline_data or {}).get("name")) if isinstance(airline_data, dict) else None
+    if origin is None and destination is None and airline is None:
         return None
-    return {"origin": origin, "destination": destination}
+    return {"origin": origin, "destination": destination, "airline": airline}
 
 
-def _get_routes(callsigns: list[str]) -> dict[str, dict | None]:
+def _fetch_aircraft(ident: str) -> dict | None:
     """
-    Routes par indicatif, avec cache mémoire (une route ne change pas
-    en cours de vol) et résolutions en parallèle. Un échec réseau n'est
-    pas mis en cache (retenté au rafraîchissement suivant).
+    Interroge adsbdb pour un code transpondeur (mode S) ou une
+    immatriculation. Retourne {manufacturer, model, owner} ou None si
+    l'appareil est inconnu du registre.
     """
-    if len(_route_cache) > _ROUTE_CACHE_MAX:
-        _route_cache.clear()
+    try:
+        data = _fetch_json(AIRCRAFT_URL.format(ident=ident), timeout=6)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
+    resp = data.get("response")
+    if not isinstance(resp, dict):
+        return None  # "unknown aircraft"
+    aircraft = resp.get("aircraft") or {}
+    manufacturer = _titleize(aircraft.get("manufacturer"))
+    model = aircraft.get("type") or None
+    owner = _titleize(aircraft.get("registered_owner"))
+    if manufacturer is None and model is None and owner is None:
+        return None
+    return {"manufacturer": manufacturer, "model": model, "owner": owner}
 
-    missing = list(dict.fromkeys(cs for cs in callsigns if cs not in _route_cache))
+
+def _resolve_batch(keys: list[str], cache: dict, fetch, label: str) -> dict[str, dict | None]:
+    """
+    Résout des clés via `fetch` avec cache mémoire (ni la route ni le
+    modèle ne changent en cours de vol) et appels en parallèle. Un échec
+    réseau n'est pas mis en cache (retenté au rafraîchissement suivant).
+    """
+    if len(cache) > _LOOKUP_CACHE_MAX:
+        cache.clear()
+
+    missing = list(dict.fromkeys(k for k in keys if k not in cache))
     if missing:
-        def worker(cs: str):
+        def worker(key: str):
             try:
-                return cs, _fetch_route(cs), True
+                return key, fetch(key), True
             except Exception as e:
-                log.warning("Route %s indisponible : %s", cs, e)
-                return cs, None, False
+                log.warning("%s %s indisponible : %s", label, key, e)
+                return key, None, False
 
         with ThreadPoolExecutor(max_workers=8) as pool:
-            for cs, route, ok in pool.map(worker, missing):
+            for key, value, ok in pool.map(worker, missing):
                 if ok:
-                    _route_cache[cs] = route
-        log.info("Routes résolues : %d indicatif(s)", len(missing))
+                    cache[key] = value
+        log.info("%s résolu(e)s : %d", label, len(missing))
 
-    return {cs: _route_cache.get(cs) for cs in callsigns}
+    return {k: cache.get(k) for k in keys}
 
 
 def get_visible_planes() -> dict:
@@ -253,7 +288,7 @@ def get_visible_planes() -> dict:
       - planes : liste triée par distance, chaque avion avec
         { hex, callsign, registration, type, distance_km, bearing,
           rel_bearing, track, speed_kmh, altitude_m, visible,
-          origin, destination }
+          origin, destination, airline, manufacturer, model }
       - config : configuration résolue utilisée pour le calcul
     """
     cfg = get_config()
@@ -305,13 +340,25 @@ def get_visible_planes() -> dict:
 
     planes.sort(key=lambda p: p["distance_km"])
 
-    # Aéroports de départ / destination (les plus proches d'abord, plafonné)
-    callsigns = [p["callsign"] for p in planes[:ROUTE_LOOKUP_MAX] if p["callsign"]]
-    routes = _get_routes(callsigns)
+    # Compagnie, aéroports de départ / destination et modèle de l'appareil
+    # (les plus proches d'abord, plafonné)
+    nearest = planes[:ROUTE_LOOKUP_MAX]
+    routes = _resolve_batch(
+        [p["callsign"] for p in nearest if p["callsign"]], _route_cache, _fetch_route, "Routes"
+    )
+    aircraft = _resolve_batch(
+        [p["hex"] for p in nearest if p["hex"]], _aircraft_cache, _fetch_aircraft, "Appareils"
+    )
     for p in planes:
         route = routes.get(p["callsign"]) if p["callsign"] else None
         p["origin"] = route["origin"] if route else None
         p["destination"] = route["destination"] if route else None
+        info = aircraft.get(p["hex"]) if p["hex"] else None
+        p["manufacturer"] = info["manufacturer"] if info else None
+        p["model"] = info["model"] if info else None
+        # À défaut de compagnie sur l'indicatif (vols privés, indicatifs
+        # non commerciaux), on retombe sur l'exploitant du registre
+        p["airline"] = (route["airline"] if route else None) or (info["owner"] if info else None)
 
     visible_count = sum(1 for p in planes if p["visible"])
     log.info("Avions : %d dans le rayon, %d dans le champ de vision", len(planes), visible_count)

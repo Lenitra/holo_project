@@ -33,6 +33,9 @@ interface Plane {
   visible: boolean;
   origin: Place | null;
   destination: Place | null;
+  airline: string | null;
+  manufacturer: string | null;
+  model: string | null;
 }
 
 interface PlanesConfig {
@@ -82,6 +85,11 @@ function formatPlace(place: Place | null): string | null {
     } catch {}
   }
   return [place.city, country].filter(Boolean).join(", ") || null;
+}
+
+/** "Airbus A320 214" ; à défaut de registre, le code type ADS-B ("A320"). */
+function formatModel(p: Plane): string | null {
+  return [p.manufacturer, p.model].filter(Boolean).join(" ") || p.type;
 }
 
 /** Direction relative lisible ("droit devant", "34° à gauche"…). */
@@ -462,8 +470,9 @@ export function PlanesPage({ connected, lastMessage, onSend }: Props) {
             <div className="planes-item-main">
               <div className="planes-item-id">
                 <span className="planes-callsign">{p.callsign || p.registration || p.hex}</span>
+                {p.airline && <span className="planes-airline">{p.airline}</span>}
                 <span className="planes-detail">
-                  {[p.type, p.registration].filter(Boolean).join(" · ")}
+                  {[formatModel(p), p.registration].filter(Boolean).join(" · ")}
                 </span>
               </div>
               <div className="planes-item-nav">
@@ -509,8 +518,9 @@ export function PlanesPage({ connected, lastMessage, onSend }: Props) {
                 <div className="planes-item-main">
                   <div className="planes-item-id">
                     <span className="planes-callsign">{p.callsign || p.registration || p.hex}</span>
+                    {p.airline && <span className="planes-airline">{p.airline}</span>}
                     <span className="planes-detail">
-                      {[p.type, p.registration].filter(Boolean).join(" · ")}
+                      {[formatModel(p), p.registration].filter(Boolean).join(" · ")}
                     </span>
                   </div>
                   <div className="planes-item-nav">

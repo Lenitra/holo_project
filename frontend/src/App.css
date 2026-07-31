@@ -2211,6 +2211,24 @@ body {
   font-size: 0.8rem;
 }
 
+.planes-airline {
+  color: var(--accent);
+  font-size: 0.82rem;
+}
+
+/* Compagnie et modèle peuvent être longs : on tronque plutôt que
+   d'écraser la colonne distance/altitude à droite */
+.planes-item-id .planes-airline,
+.planes-item-id .planes-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.planes-item-out .planes-airline {
+  color: var(--text-muted);
+}
+
 .planes-item-nav {
   display: flex;
   flex-direction: column;
