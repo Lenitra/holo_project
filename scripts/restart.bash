@@ -12,7 +12,8 @@
 # ==========================================================================
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-LOG="$ROOT/scripts/restart.log"
+LOG="$ROOT/logs/restart.log"
+mkdir -p "$ROOT/logs"
 
 {
     echo

@@ -315,16 +315,54 @@ holo_project/
 
 ## Lancement
 
+### En développement
+
 ```bash
 # Terminal 1 — Backend (à lancer en premier)
-cd backend && python main.py
+cd backend && uv run python main.py
 
 # Terminal 2 — Serveur Node (sert hologramme + télécommande)
-cd web_remote && npm start
+cd frontend && npm start
 
 # Firefox kiosk (hologramme)
 firefox --kiosk http://localhost:3000/hologram
 ```
+
+### En production (Raspberry Pi)
+
+Un seul script fait tout — mise à jour du code, dépendances, build, puis
+démarrage supervisé des deux services :
+
+```bash
+bash scripts/runall.bash
+```
+
+Au démarrage de la machine, c'est la **crontab** qui l'appelle. Le chemin
+doit être absolu : cron ne se place nulle part.
+
+```bash
+crontab -e
+```
+
+```cron
+@reboot /bin/bash /home/pi/holo_project/scripts/runall.bash >> /home/pi/holo_project/logs/boot.log 2>&1
+```
+
+C'est aussi le chemin du redéploiement : le bouton **« Mettre à jour &
+Redémarrer »** de la page Debug passe par `scripts/restart.bash`, qui coupe
+la stack et rappelle `runall.bash` — donc code à jour et build refait.
+
+**Journaux** — `logs/boot.log` (le lanceur), `logs/backend.log`,
+`logs/node.log` (un par service, avec les relances), `logs/restart.log`.
+
+**Options** : `--no-update` (ne touche pas au code), `--rebuild` (force le
+build), `--once` (ne relance pas un service qui tombe), `--sans-attente`
+(n'attend pas le réseau). `bash scripts/runall.bash --help` pour le détail.
+
+> Si `uv` ou `npm` viennent d'un installeur qui écrit dans `~/.bashrc`
+> (nvm, l'installeur officiel de uv), vérifiez le démarrage avec
+> `env -i /bin/bash scripts/runall.bash` : c'est ce que voit cron, qui ne
+> lit aucun fichier de profil.
 
 ---
 
