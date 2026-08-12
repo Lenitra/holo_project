@@ -1,0 +1,9 @@
+# Les scripts shell tournent sur le Raspberry Pi : des fins de ligne CRLF
+# les rendraient illisibles pour Linux ("bad interpreter: /bin/bash^M"),
+# et le message n'aide pas à comprendre pourquoi. On les épingle en LF
+# quel que soit le core.autocrlf de la machine qui commite.
+*.sh    text eol=lf
+*.bash  text eol=lf
+
+# Symétrie : les scripts Windows restent en CRLF.
+*.bat   text eol=crlf
